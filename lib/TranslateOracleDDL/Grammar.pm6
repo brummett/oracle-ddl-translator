@@ -32,6 +32,18 @@ grammar TranslateOracleDDL::Grammar {
         'CREATE SEQUENCE' <ws> <entity-name> [ <ws> <create-sequence-clause> ]* <ws>*? ';'
     }
 
-    proto rule create-sequence-clause { * }
+    proto token create-sequence-clause { * }
+    token create-sequence-clause:sym<START-WITH>     { 'START WITH' <ws> <integer> }
+    token create-sequence-clause:sym<INCREMENT-BY>   { 'INCREMENT BY' <ws> <integer> }
+    token create-sequence-clause:sym<MINVALUE>       { 'MINVALUE' <ws> <integer> }
+    token create-sequence-clause:sym<NOMINVALUE>     { 'NOMINVALUE' }
+    token create-sequence-clause:sym<MAXVALUE>       { 'MAXVALUE' <ws> <integer> }
+    token create-sequence-clause:sym<NOMAXVALUE>     { 'NOMAXVALUE' }
+    token create-sequence-clause:sym<CACHE>          { 'CACHE' <ws> <integer> }
+    token create-sequence-clause:sym<NOCACHE>        { 'NOCACHE' }
+    token create-sequence-clause:sym<CYCLE>          { 'CYCLE' }
+    token create-sequence-clause:sym<NOCYCLE>        { 'NOCYCLE' }
+    token create-sequence-clause:sym<ORDER>          { 'ORDER' }
+    token create-sequence-clause:sym<NOORDER>        { 'NOORDER' }
 }
 

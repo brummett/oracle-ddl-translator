@@ -40,9 +40,13 @@ subtest 'PROMPT' => {
 }
 
 subtest 'CREATE SEQUENCE' => {
-    plan 1;
+    plan 2;
 
     is $xlate.parse("CREATE SEQUENCE foo.seqname;"),
         'CREATE SEQUENCE foo.seqname;',
         'basic CREATE SEQUENCE';
+
+    is $xlate.parse("CREATE SEQUENCE foo.seqname\nSTART WITH 123 INCREMENT BY 2 MINVALUE 3 NOMAXVALUE;"),
+        'CREATE SEQUENCE foo.seqname START WITH 123 INCREMENT BY 2 MINVALUE 3 NO MAXVALUE;',
+        'CREATE SEQUENCE with some add-ons';
 }

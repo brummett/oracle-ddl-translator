@@ -23,9 +23,17 @@ class TranslateOracleDDL::ToPostgres {
 
     method sql-statement:sym<CREATE-SEQUENCE> ($/) {
         if $<create-sequence-clause>.elems {
-            make "CREATE SEQUENCE $<entity-name> " ~ $<create-sequence-clause>.join(' ');
+            my @clauses = $<create-sequence-clause>.map: { .made || ~ $_ };
+            make "CREATE SEQUENCE $<entity-name> " ~ @clauses.join(' ');
         } else {
             make "CREATE SEQUENCE $<entity-name>";
         }
     }
+
+    method create-sequence-clause:sym<NOMINVALUE> ($/)  { make 'NO MINVALUE' }
+    method create-sequence-clause:sym<NOMAXVALUE> ($/)  { make 'NO MAXVALUE' }
+    method create-sequence-clause:sym<NOCYCLE> ($/)     { make 'NO CYCLE' }
+    method create-sequence-clause:sym<NOCACHE> ($/)     { make '' }
+    method create-sequence-clause:sym<ORDER> ($/)       { make '' }
+    method create-sequence-clause:sym<NOORDER> ($/)     { make '' }
 }
