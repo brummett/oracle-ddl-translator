@@ -5,6 +5,8 @@ use Test;
 
 plan 1;
 
-my $xlate = TranslateOracleDDL.new();
+class DummyTranslator { }
+
+my $xlate = TranslateOracleDDL.new(translator => DummyTranslator.new);
 
 ok $xlate, 'Created translator';
