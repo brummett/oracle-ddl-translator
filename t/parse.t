@@ -10,9 +10,13 @@ my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.
 ok $xlate, 'created translator';
 
 subtest 'REM' => {
-    plan 1;
+    plan 2;
 
     my $output = $xlate.parse('REM This is a test');
     is $output, "-- This is a test;", 'translated REM';
+
+    is $xlate.parse("REM comment 1\nREM comment 2\nREM comment 3"),
+        "-- comment 1;\n-- comment 2;\n-- comment 3;",
+        'multiple REMs';
 }
     

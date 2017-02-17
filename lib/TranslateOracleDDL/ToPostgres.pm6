@@ -2,7 +2,7 @@ use v6;
 
 class TranslateOracleDDL::ToPostgres {
     method TOP($/) {
-        make $<sql-statement>>>.made>>.join(";\n") ~ ";";
+        make $<sql-statement>>>.made.join(";\n") ~ ";";
     }
 
     method sql-statement:sym<REM> ($/) {
