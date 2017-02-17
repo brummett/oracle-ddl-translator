@@ -23,7 +23,7 @@ class TranslateOracleDDL::ToPostgres {
 
     method sql-statement:sym<CREATE-SEQUENCE> ($/) {
         if $<create-sequence-clause>.elems {
-            my @clauses = $<create-sequence-clause>.map: { .made || ~ $_ };
+            my @clauses = $<create-sequence-clause>.map({ .made // ~ $_ }).grep({ $_ });
             make "CREATE SEQUENCE $<entity-name> " ~ @clauses.join(' ');
         } else {
             make "CREATE SEQUENCE $<entity-name>";
