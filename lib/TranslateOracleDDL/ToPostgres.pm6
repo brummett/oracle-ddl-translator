@@ -20,4 +20,12 @@ class TranslateOracleDDL::ToPostgres {
             make "\\echo";
         }
     }
+
+    method sql-statement:sym<CREATE-SEQUENCE> ($/) {
+        if $<create-sequence-clause>.elems {
+            make "CREATE SEQUENCE $<entity-name> " ~ $<create-sequence-clause>.join(' ');
+        } else {
+            make "CREATE SEQUENCE $<entity-name>";
+        }
+    }
 }

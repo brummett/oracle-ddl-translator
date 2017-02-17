@@ -4,7 +4,7 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
-plan 3;
+plan 4;
 
 my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new);
 ok $xlate, 'created translator';
@@ -37,4 +37,12 @@ subtest 'PROMPT' => {
     is $xlate.parse("PROMPT comment 1\nPROMPT\nPROMPT comment 3\n"),
         "\\echo comment 1;\n\\echo;\n\\echo comment 3;",
         'multiple PROMPTs, some with no content';
+}
+
+subtest 'CREATE SEQUENCE' => {
+    plan 1;
+
+    is $xlate.parse("CREATE SEQUENCE foo.seqname;"),
+        'CREATE SEQUENCE foo.seqname;',
+        'basic CREATE SEQUENCE';
 }

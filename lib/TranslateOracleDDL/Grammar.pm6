@@ -21,5 +21,17 @@ grammar TranslateOracleDDL::Grammar {
     token sql-statement:sym<PROMPT> {
         'PROMPT' [ \h+ <string-to-end-of-line> ]? \v?
     }
+
+    token identifier { \w+ }
+    token integer { \d+ }
+    token entity-name {
+        [ <identifier> '.' ]? <identifier>  # either "name" or "schema.name"
+    }
+
+    token sql-statement:sym<CREATE-SEQUENCE> {
+        'CREATE SEQUENCE' <ws> <entity-name> [ <ws> <create-sequence-clause> ]* <ws>*? ';'
+    }
+
+    proto rule create-sequence-clause { * }
 }
 
