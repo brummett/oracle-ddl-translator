@@ -13,6 +13,6 @@ subtest 'REM' => {
     plan 1;
 
     my $output = $xlate.parse('REM This is a test');
-    is $output.made, "-- This is a test;", 'translated REM';
+    is $output, "-- This is a test;", 'translated REM';
 }
     
