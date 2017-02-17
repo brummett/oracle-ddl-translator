@@ -12,4 +12,12 @@ class TranslateOracleDDL::ToPostgres {
             make '--';
         }
     }
+
+    method sql-statement:sym<PROMPT> ($/) {
+        if $<string-to-end-of-line> {
+            make "\\echo $<string-to-end-of-line>";
+        } else {
+            make "\\echo";
+        }
+    }
 }

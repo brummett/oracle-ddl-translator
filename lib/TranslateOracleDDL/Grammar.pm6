@@ -17,5 +17,9 @@ grammar TranslateOracleDDL::Grammar {
     token sql-statement:sym<REM> {
         'REM' [ \h+ <string-to-end-of-line> ]? \v?
     }
+
+    token sql-statement:sym<PROMPT> {
+        'PROMPT' [ \h+ <string-to-end-of-line> ]? \v?
+    }
 }
 

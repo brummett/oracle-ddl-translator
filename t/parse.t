@@ -4,7 +4,7 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
-plan 2;
+plan 3;
 
 my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new);
 ok $xlate, 'created translator';
@@ -24,3 +24,17 @@ subtest 'REM' => {
         'multiple REMs, some with no content';
 }
     
+subtest 'PROMPT' => {
+    plan 3;
+
+    my $output = $xlate.parse('PROMPT This is a test');
+    is $output, "\\echo This is a test;", 'translated PROMPT';
+
+    is $xlate.parse("PROMPT comment 1\nPROMPT comment 2\nPROMPT comment 3"),
+        "\\echo comment 1;\n\\echo comment 2;\n\\echo comment 3;",
+        'multiple PROMPTs';
+
+    is $xlate.parse("PROMPT comment 1\nPROMPT\nPROMPT comment 3\n"),
+        "\\echo comment 1;\n\\echo;\n\\echo comment 3;",
+        'multiple PROMPTs, some with no content';
+}
