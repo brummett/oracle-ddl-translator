@@ -6,6 +6,10 @@ class TranslateOracleDDL::ToPostgres {
     }
 
     method sql-statement:sym<REM> ($/) {
-        make "-- $<string-to-end-of-line>";
+        if $<string-to-end-of-line> {
+            make "-- $<string-to-end-of-line>";
+        } else {
+            make '--';
+        }
     }
 }

@@ -9,13 +9,13 @@ grammar TranslateOracleDDL::Grammar {
     }
 
     token string-to-end-of-line {
-        <[\V]>*
+        \V+
     }
 
     proto rule sql-statement { * }
 
-    rule sql-statement:sym<REM> {
-        'REM ' <string-to-end-of-line> \v?
+    token sql-statement:sym<REM> {
+        'REM' [ \h+ <string-to-end-of-line> ]? \v?
     }
 }
 
