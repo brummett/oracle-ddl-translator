@@ -22,6 +22,10 @@ grammar TranslateOracleDDL::Grammar {
         'PROMPT' [ \h+ <string-to-end-of-line> ]? \v?
     }
 
+    token sql-statement:sym<empty-line> {  # happens between statements
+        \v+
+    }
+
     token identifier { \w+ }
     token bigint { \d+ }
     token entity-name {

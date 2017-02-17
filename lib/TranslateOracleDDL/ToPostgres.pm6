@@ -2,7 +2,7 @@ use v6;
 
 class TranslateOracleDDL::ToPostgres {
     method TOP($/) {
-        make $<sql-statement>>>.made.join(";\n") ~ ";\n";
+        make $<sql-statement>>>.made.grep({ $_ }).join(";\n") ~ ";\n";
     }
 
     method sql-statement:sym<REM> ($/) {
@@ -20,6 +20,8 @@ class TranslateOracleDDL::ToPostgres {
             make "\\echo";
         }
     }
+
+    method sql-statement:sym<empty-line> ($/) { return Any; }
 
     method bigint ($/) {
         make $/ > 9223372036854775807
