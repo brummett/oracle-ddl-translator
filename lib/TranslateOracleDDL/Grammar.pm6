@@ -23,7 +23,7 @@ grammar TranslateOracleDDL::Grammar {
     }
 
     token identifier { \w+ }
-    token integer { \d+ }
+    token bigint { \d+ }
     token entity-name {
         [ <identifier> '.' ]? <identifier>  # either "name" or "schema.name"
     }
@@ -33,13 +33,13 @@ grammar TranslateOracleDDL::Grammar {
     }
 
     proto token create-sequence-clause { * }
-    token create-sequence-clause:sym<START-WITH>     { 'START WITH' <ws> <integer> }
-    token create-sequence-clause:sym<INCREMENT-BY>   { 'INCREMENT BY' <ws> <integer> }
-    token create-sequence-clause:sym<MINVALUE>       { 'MINVALUE' <ws> <integer> }
+    token create-sequence-clause:sym<START-WITH>     { 'START WITH' <ws> <bigint> }
+    token create-sequence-clause:sym<INCREMENT-BY>   { 'INCREMENT BY' <ws> <bigint> }
+    token create-sequence-clause:sym<MINVALUE>       { 'MINVALUE' <ws> <bigint> }
     token create-sequence-clause:sym<NOMINVALUE>     { 'NOMINVALUE' }
-    token create-sequence-clause:sym<MAXVALUE>       { 'MAXVALUE' <ws> <integer> }
+    token create-sequence-clause:sym<MAXVALUE>       { 'MAXVALUE' <ws> <bigint> }
     token create-sequence-clause:sym<NOMAXVALUE>     { 'NOMAXVALUE' }
-    token create-sequence-clause:sym<CACHE>          { 'CACHE' <ws> <integer> }
+    token create-sequence-clause:sym<CACHE>          { 'CACHE' <ws> <bigint> }
     token create-sequence-clause:sym<NOCACHE>        { 'NOCACHE' }
     token create-sequence-clause:sym<CYCLE>          { 'CYCLE' }
     token create-sequence-clause:sym<NOCYCLE>        { 'NOCYCLE' }

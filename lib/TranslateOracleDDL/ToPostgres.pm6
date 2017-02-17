@@ -21,6 +21,12 @@ class TranslateOracleDDL::ToPostgres {
         }
     }
 
+    method bigint ($/) {
+        make $/ > 9223372036854775807
+            ?? make "9223372036854775807"
+            !! make ~ $/;
+    }
+
     method sql-statement:sym<CREATE-SEQUENCE> ($/) {
         if $<create-sequence-clause>.elems {
             my @clauses = $<create-sequence-clause>.map({ .made // ~ $_ }).grep({ $_ });
@@ -30,6 +36,11 @@ class TranslateOracleDDL::ToPostgres {
         }
     }
 
+    method create-sequence-clause:sym<START-WITH> ($/)  { make 'START WITH ' ~ $<bigint>.made }
+    method create-sequence-clause:sym<INCREMENT-BY> ($/)  { make 'INCREMENT BY ' ~ $<bigint>.made }
+    method create-sequence-clause:sym<MINVALUE> ($/)    { make 'MINVALUE ' ~ $<bigint>.made }
+    method create-sequence-clause:sym<MAXVALUE> ($/)    { make 'MAXVALUE ' ~ $<bigint>.made }
+    method create-sequence-clause:sym<CACHE> ($/)       { make 'CACHE ' ~ $<bigint>.made }
     method create-sequence-clause:sym<NOMINVALUE> ($/)  { make 'NO MINVALUE' }
     method create-sequence-clause:sym<NOMAXVALUE> ($/)  { make 'NO MAXVALUE' }
     method create-sequence-clause:sym<NOCYCLE> ($/)     { make 'NO CYCLE' }
