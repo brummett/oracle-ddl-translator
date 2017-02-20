@@ -34,7 +34,7 @@ subtest 'basic' => {
 }
 
 subtest 'numbers' => {
-    plan 4;
+    plan 5;
 
     is $xlate.parse( q :to<ORACLE> ),
         CREATE TABLE foo.table3 (
@@ -49,6 +49,10 @@ subtest 'numbers' => {
         ORACLE
         "CREATE TABLE foo.table3 ( id INT NOT NULL, num1 SMALLINT, num3 SMALLINT, num5 INT, num9 BIGINT, num19 DECIMAL(19), numAB DECIMAL(10,2) );\n",
         'NUMBER type conversions';
+
+    is $xlate.parse( 'CREATE TABLE foo.ints ( col_a INTEGER );'),
+                     "CREATE TABLE foo.ints ( col_a DECIMAL(38) );\n",
+        'INTEGER';
 
     is $xlate.parse( 'CREATE TABLE foo.floats ( col_a FLOAT );'),
                      "CREATE TABLE foo.floats ( col_a DOUBLE PRECISION );\n",

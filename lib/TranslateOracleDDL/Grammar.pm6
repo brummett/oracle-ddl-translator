@@ -64,6 +64,7 @@ grammar TranslateOracleDDL::Grammar {
     rule column-type:sym<NUMBER-with-scale> { 'NUMBER' '(' <integer> ',' <integer> ')' }
     rule column-type:sym<NUMBER>            { 'NUMBER'      [ '(' <integer> ')' ]? }
     rule column-type:sym<FLOAT>             { 'FLOAT' }
+    rule column-type:sym<INTEGER>           { 'INTEGER' }
     rule column-type:sym<DATE>              { 'DATE' }
     rule column-type:sym<TIMESTAMP>         { 'TIMESTAMP' '(' <integer> ')' }
     rule column-type:sym<CHAR>              { 'CHAR' '(' <integer> ')' }
