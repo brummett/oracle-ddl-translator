@@ -68,4 +68,19 @@ class TranslateOracleDDL::ToPostgres {
 
     method create-table-column-constraint:sym<NOT-NULL> ($/) { make 'NOT NULL' }
     method create-table-column-constraint:sym<PRIMARY-KEY> ($/) { make 'PRIMARY KEY' }
+
+
+    method sql-statement:sym<SELECT> ($/) {
+        make "SELECT $<select-column-list>FROM $<rest-of-select>"
+    }        
+    #rule sql-statement:sym<SELECT> {
+    #    'SELECT'
+    #    <select-column-list>
+    #    ['FROM'|'from'] <rest-of-select>
+    #}
+
+    
+    #method select-column-def:sym<COLUMN-NAME>        ($/) { make $<identifier> }
+    #method select-column-def:sym<QUOTED-COLUMN-NAME> ($/) { make $<identifier> }
+
 }
