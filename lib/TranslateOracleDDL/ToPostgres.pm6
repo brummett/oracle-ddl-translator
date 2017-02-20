@@ -55,11 +55,17 @@ class TranslateOracleDDL::ToPostgres {
     }
 
     method create-table-column-list ($/) { make $<create-table-column-def>>>.made.join(', ') }
-    method create-table-column-def ($/) { make join(' ', $<identifier>, $<column-type>.made) }
+    method create-table-column-def ($/) {
+        my @parts = ( $<identifier>, $<column-type>.made );
+        @parts.push( $<create-table-column-constraint>>>.made ) if $<create-table-column-constraint>;
+        make join(' ', @parts);
+    }
 
     # data types
     method column-type:sym<VARCHAR2> ($/)   { make $<integer> ?? "VARCHAR($<integer>)" !! "VARCHAR" }
     method column-type:sym<NUMBER> ($/)     { make $<integer> ?? "INT($<integer>)" !! "INT" }
     method column-type:sym<DATE> ($/)       { make "TIMESTAMP(0)" }
 
+    method create-table-column-constraint:sym<NOT-NULL> ($/) { make 'NOT NULL' }
+    method create-table-column-constraint:sym<PRIMARY-KEY> ($/) { make 'PRIMARY KEY' }
 }

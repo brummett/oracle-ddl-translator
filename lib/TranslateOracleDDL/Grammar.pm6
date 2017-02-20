@@ -60,11 +60,15 @@ grammar TranslateOracleDDL::Grammar {
 
     rule create-table-column-list { <create-table-column-def>+ % ',' }
 
-    rule create-table-column-def { <identifier> <column-type> }
+    rule create-table-column-def { <identifier> <column-type> <create-table-column-constraint>* }
 
     proto rule column-type { * }
     rule column-type:sym<VARCHAR2>  { 'VARCHAR2'    [ '(' <integer> ')' ]? }
     rule column-type:sym<NUMBER>    { 'NUMBER'      [ '(' <integer> ')' ]? }
     rule column-type:sym<DATE>      { 'DATE' }
+
+    proto rule create-table-column-constraint { * }
+    rule create-table-column-constraint:sym<NOT-NULL> { 'NOT NULL' }
+    rule create-table-column-constraint:sym<PRIMARY-KEY> { 'PRIMARY KEY' }
 }
 
