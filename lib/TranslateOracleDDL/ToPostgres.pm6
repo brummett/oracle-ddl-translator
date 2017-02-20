@@ -78,7 +78,7 @@ class TranslateOracleDDL::ToPostgres {
     }
     method column-type:sym<NUMBER-with-scale> ($/) {
         my ($precision, $scale) = $<integer>;
-        die "Can't handle NUMBER($<integer>): Out of range 1..38" if $precision ~~ out-of-range;
+        die "Can't handle NUMBER($precision): Out of range 1..38" if $precision.Int ~~ out-of-range;
 
         make "DECIMAL($precision,$scale)";
     }

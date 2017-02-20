@@ -35,7 +35,7 @@ subtest 'basic' => {
 }
 
 subtest 'NUMBER' => {
-    plan 2;
+    plan 3;
 
     is $xlate.parse( q :to<ORACLE> ),
         CREATE TABLE foo.table3 (
@@ -52,5 +52,8 @@ subtest 'NUMBER' => {
         'NUMBER type conversions';
 
     throws-like { $xlate.parse( 'CREATE TABLE foo ( id NUMBER(39));' ) },
+        Exception, message => /'Out of range'/;
+
+    throws-like { $xlate.parse( 'CREATE TABLE foo ( id NUMBER(39,2));' ) },
         Exception, message => /'Out of range'/;
 }
