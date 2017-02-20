@@ -60,14 +60,14 @@ grammar TranslateOracleDDL::Grammar {
     rule create-table-column-def { <identifier> <column-type> <create-table-column-constraint>* }
 
     proto rule column-type { * }
-    rule column-type:sym<VARCHAR2>  { 'VARCHAR2'    [ '(' <integer> ')' ]? }
+    rule column-type:sym<VARCHAR2>          { 'VARCHAR2'    [ '(' <integer> ')' ]? }
     rule column-type:sym<NUMBER-with-scale> { 'NUMBER' '(' <integer> ',' <integer> ')' }
-    rule column-type:sym<NUMBER>    { 'NUMBER'      [ '(' <integer> ')' ]? }
-    rule column-type:sym<DATE>      { 'DATE' }
-    rule column-type:sym<TIMESTAMP> { 'TIMESTAMP' '(' <integer> ')' }
-    rule column-type:sym<CHAR>      { 'CHAR' '(' <integer> ')' }
-    rule column-type:sym<BLOB>      { 'BLOB' }
-    rule column-type:sym<CLOB>      { 'CLOB' }
+    rule column-type:sym<NUMBER>            { 'NUMBER'      [ '(' <integer> ')' ]? }
+    rule column-type:sym<DATE>              { 'DATE' }
+    rule column-type:sym<TIMESTAMP>         { 'TIMESTAMP' '(' <integer> ')' }
+    rule column-type:sym<CHAR>              { 'CHAR' '(' <integer> ')' }
+    rule column-type:sym<BLOB>              { 'BLOB' }
+    rule column-type:sym<CLOB>              { 'CLOB' }
 
     proto rule create-table-column-constraint { * }
     rule create-table-column-constraint:sym<NOT-NULL> { 'NOT NULL' }
