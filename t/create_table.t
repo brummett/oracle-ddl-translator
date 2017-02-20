@@ -4,7 +4,7 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
-plan 5;
+plan 6;
 
 my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new);
 ok $xlate, 'created translator';
@@ -17,10 +17,9 @@ subtest 'basic' => {
             (
                 col1 VARCHAR2 (10)
                 , col2 NUMBER
-                , when DATE
             );
         ORACLE
-        "CREATE TABLE foo.table1 ( col1 VARCHAR(10), col2 INT, when TIMESTAMP(0) );\n",
+        "CREATE TABLE foo.table1 ( col1 VARCHAR(10), col2 INT );\n",
         'table1';
 
     is $xlate.parse( q :to<ORACLE> ),
@@ -71,5 +70,13 @@ subtest 'LOB' => {
 
     is $xlate.parse('CREATE TABLE foo.lobs ( col_a BLOB, col_b CLOB );'),
         "CREATE TABLE foo.lobs ( col_a BYTEA, col_b TEXT );\n",
+        'create table';
+}
+
+subtest 'time and date' => {
+    plan 1;
+
+    is $xlate.parse('CREATE TABLE foo.dates ( a_date DATE, a_time TIMESTAMP(6) );'),
+        "CREATE TABLE foo.dates ( a_date TIMESTAMP(0), a_time TIMESTAMP(6) );\n",
         'create table';
 }
