@@ -51,11 +51,11 @@ grammar TranslateOracleDDL::Grammar {
     rule sql-statement:sym<CREATE-TABLE> {
         'CREATE TABLE'
         <entity-name>
-        '(' <create-table-column-list> ')'
+        '('
+            <create-table-column-def>+ % ','
+        ')'
         ';'
     }
-
-    rule create-table-column-list { <create-table-column-def>+ % ',' }
 
     rule create-table-column-def { <identifier> <column-type> <create-table-column-constraint>* }
 

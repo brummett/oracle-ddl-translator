@@ -51,10 +51,10 @@ class TranslateOracleDDL::ToPostgres {
     method create-sequence-clause:sym<NOORDER> ($/)     { make '' }
 
     method sql-statement:sym<CREATE-TABLE> ($/) {
-        make "CREATE TABLE $<entity-name> ( " ~ $<create-table-column-list>.made ~ " )"
+        my @columns = $<create-table-column-def>>>.made;
+        make "CREATE TABLE $<entity-name> ( " ~ @columns.join(', ') ~ " )"
     }
 
-    method create-table-column-list ($/) { make $<create-table-column-def>>>.made.join(', ') }
     method create-table-column-def ($/) {
         my @parts = ( $<identifier>, $<column-type>.made );
         @parts.push( $<create-table-column-constraint>>>.made ) if $<create-table-column-constraint>;
