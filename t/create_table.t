@@ -62,11 +62,11 @@ subtest 'numbers' => {
         Exception, message => /'Out of range'/;
 }
 
-subtest 'CHAR' => {
+subtest 'characters' => {
     plan 1;
 
-    is $xlate.parse( 'CREATE TABLE foo.chartable ( id CHAR(1), thing CHAR(2) );'),
-                     "CREATE TABLE foo.chartable ( id CHAR(1), thing CHAR(2) );\n",
+    is $xlate.parse( 'CREATE TABLE foo.chartable ( id CHAR(1), thing CHAR(2), blah LONG );'),
+                     "CREATE TABLE foo.chartable ( id CHAR(1), thing CHAR(2), blah TEXT );\n",
         'create table';
 }
 
