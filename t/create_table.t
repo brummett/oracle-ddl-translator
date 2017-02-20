@@ -19,7 +19,7 @@ subtest 'basic' => {
                 , col2 NUMBER
             );
         ORACLE
-        "CREATE TABLE foo.table1 ( col1 VARCHAR(10), col2 INT );\n",
+        "CREATE TABLE foo.table1 ( col1 VARCHAR(10), col2 DOUBLE PRECISION );\n",
         'table1';
 
     is $xlate.parse( q :to<ORACLE> ),
@@ -47,7 +47,7 @@ subtest 'numbers' => {
             , numAB NUMBER  (10,2)
             );
         ORACLE
-        "CREATE TABLE foo.table3 ( id INT NOT NULL, num1 SMALLINT, num3 SMALLINT, num5 INT, num9 BIGINT, num19 DECIMAL(19), numAB DECIMAL(10,2) );\n",
+        "CREATE TABLE foo.table3 ( id DOUBLE PRECISION NOT NULL, num1 SMALLINT, num3 SMALLINT, num5 INT, num9 BIGINT, num19 DECIMAL(19), numAB DECIMAL(10,2) );\n",
         'NUMBER type conversions';
 
     is $xlate.parse( 'CREATE TABLE foo.ints ( col_a INTEGER );'),

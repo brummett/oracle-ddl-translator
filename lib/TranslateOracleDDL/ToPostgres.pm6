@@ -82,6 +82,7 @@ class TranslateOracleDDL::ToPostgres {
 
         make "DECIMAL($precision,$scale)";
     }
+    method column-type:sym<NUMBER> ($/)     { make 'DOUBLE PRECISION' }
 
     method column-type:sym<DATE> ($/)       { make "TIMESTAMP(0)" }
     method column-type:sym<TIMESTAMP> ($/)  { make "TIMESTAMP($<integer>)"; }
