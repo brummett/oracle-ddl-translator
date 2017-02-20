@@ -63,7 +63,17 @@ class TranslateOracleDDL::ToPostgres {
 
     # data types
     method column-type:sym<VARCHAR2> ($/)   { make $<integer> ?? "VARCHAR($<integer>)" !! "VARCHAR" }
-    method column-type:sym<NUMBER> ($/)     { make $<integer> ?? "INT($<integer>)" !! "INT" }
+    method column-type:sym<NUMBER> ($/)     {
+        given $<integer>.Int {
+            when 1 ..^ 3    { make 'SMALLINT' }
+            when 3 ..^ 5    { make 'SMALLINT' }
+            when 5 ..^ 9    { make 'INT' }
+            when 9 ..^ 19   { make 'BIGINT' }
+            when 19 .. 38   { make "DECIMAL($<integer>)" }
+            when Int        { make 'INT' }
+            default         { die "Can't handle NUMBER($<integer>)" }
+        }
+    }
     method column-type:sym<DATE> ($/)       { make "TIMESTAMP(0)" }
 
     method create-table-column-constraint:sym<NOT-NULL> ($/) { make 'NOT NULL' }

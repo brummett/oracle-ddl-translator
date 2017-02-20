@@ -10,7 +10,7 @@ my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.
 ok $xlate, 'created translator';
 
 subtest 'basic' => {
-    plan 2;
+    plan 3;
 
     is $xlate.parse( q :to<ORACLE> ),
         CREATE TABLE foo.table1
@@ -32,4 +32,17 @@ subtest 'basic' => {
         ORACLE
         "CREATE TABLE foo.table2 ( id VARCHAR(10) NOT NULL PRIMARY KEY, name VARCHAR(20) NOT NULL );\n",
         'with NOT NULL constraint';
+
+    is $xlate.parse( q :to<ORACLE> ),
+        CREATE TABLE foo.table3 (
+            id      NUMBER NOT NULL
+            , num1  NUMBER  (1)
+            , num3  NUMBER  (3)
+            , num5  NUMBER  (5)
+            , num9  NUMBER  (9)
+            , num19 NUMBER  (19)
+            );
+        ORACLE
+        "CREATE TABLE foo.table3 ( id INT NOT NULL, num1 SMALLINT, num3 SMALLINT, num5 INT, num9 BIGINT, num19 DECIMAL(19) );\n",
+        'NUMBER type conversions';
 }
