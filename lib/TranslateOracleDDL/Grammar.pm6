@@ -72,6 +72,7 @@ grammar TranslateOracleDDL::Grammar {
     rule column-type:sym<BLOB>              { 'BLOB' }
     rule column-type:sym<CLOB>              { 'CLOB' }
     rule column-type:sym<LONG>              { 'LONG' }
+    rule column-type:sym<RAW>               { 'RAW' '(' <integer> ')' }
 
     proto rule create-table-column-constraint { * }
     rule create-table-column-constraint:sym<NOT-NULL> { 'NOT NULL' }

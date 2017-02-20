@@ -73,8 +73,8 @@ subtest 'characters' => {
 subtest 'LOB' => {
     plan 1;
 
-    is $xlate.parse('CREATE TABLE foo.lobs ( col_a BLOB,  col_b CLOB );'),
-                    "CREATE TABLE foo.lobs ( col_a BYTEA, col_b TEXT );\n",
+    is $xlate.parse('CREATE TABLE foo.lobs ( col_a BLOB,  col_b CLOB, col_c RAW(32) );'),
+                    "CREATE TABLE foo.lobs ( col_a BYTEA, col_b TEXT, col_c BYTEA );\n",
         'create table';
 }
 

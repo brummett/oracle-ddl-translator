@@ -88,6 +88,7 @@ class TranslateOracleDDL::ToPostgres {
     method column-type:sym<TIMESTAMP> ($/)  { make "TIMESTAMP($<integer>)"; }
     method column-type:sym<CHAR> ($/)       { make "CHAR($<integer>)" }
     method column-type:sym<BLOB> ($/)       { make 'BYTEA' }
+    method column-type:sym<RAW> ($/)        { make 'BYTEA' }
     method column-type:sym<CLOB> ($/)       { make 'TEXT' }
     method column-type:sym<LONG> ($/)       { make 'TEXT' }
     method column-type:sym<FLOAT> ($/)      { make 'DOUBLE PRECISION' }
