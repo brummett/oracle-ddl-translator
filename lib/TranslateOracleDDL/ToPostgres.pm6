@@ -49,4 +49,17 @@ class TranslateOracleDDL::ToPostgres {
     method create-sequence-clause:sym<NOCACHE> ($/)     { make '' }
     method create-sequence-clause:sym<ORDER> ($/)       { make '' }
     method create-sequence-clause:sym<NOORDER> ($/)     { make '' }
+
+    method sql-statement:sym<CREATE-TABLE> ($/) {
+        make "CREATE TABLE $<entity-name> ( " ~ $<create-table-column-list>.made ~ " )"
+    }
+
+    method create-table-column-list ($/) { make $<create-table-column-def>>>.made.join(', ') }
+    method create-table-column-def ($/) { make join(' ', $<identifier>, $<column-type>.made) }
+
+    # data types
+    method column-type:sym<VARCHAR2> ($/)   { make $<integer> ?? "VARCHAR($<integer>)" !! "VARCHAR" }
+    method column-type:sym<NUMBER> ($/)     { make $<integer> ?? "INT($<integer>)" !! "INT" }
+    method column-type:sym<DATE> ($/)       { make "TIMESTAMP(0)" }
+
 }

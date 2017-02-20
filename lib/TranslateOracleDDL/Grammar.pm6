@@ -28,6 +28,7 @@ grammar TranslateOracleDDL::Grammar {
 
     token identifier { \w+ }
     token bigint { \d+ }
+    token integer { \d+ }
     token entity-name {
         [ <identifier> '.' ]? <identifier>  # either "name" or "schema.name"
     }
@@ -49,5 +50,21 @@ grammar TranslateOracleDDL::Grammar {
     token create-sequence-clause:sym<NOCYCLE>        { 'NOCYCLE' }
     token create-sequence-clause:sym<ORDER>          { 'ORDER' }
     token create-sequence-clause:sym<NOORDER>        { 'NOORDER' }
+
+    rule sql-statement:sym<CREATE-TABLE> {
+        'CREATE TABLE'
+        <entity-name>
+        '(' <create-table-column-list> ')'
+        ';'
+    }
+
+    rule create-table-column-list { <create-table-column-def>+ % ',' }
+
+    rule create-table-column-def { <identifier> <column-type> }
+
+    proto rule column-type { * }
+    rule column-type:sym<VARCHAR2>  { 'VARCHAR2'    [ '(' <integer> ')' ]? }
+    rule column-type:sym<NUMBER>    { 'NUMBER'      [ '(' <integer> ')' ]? }
+    rule column-type:sym<DATE>      { 'DATE' }
 }
 
