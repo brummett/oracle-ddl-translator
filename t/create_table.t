@@ -33,8 +33,8 @@ subtest 'basic' => {
         'with NOT NULL constraint';
 }
 
-subtest 'NUMBER' => {
-    plan 3;
+subtest 'numbers' => {
+    plan 4;
 
     is $xlate.parse( q :to<ORACLE> ),
         CREATE TABLE foo.table3 (
@@ -50,8 +50,9 @@ subtest 'NUMBER' => {
         "CREATE TABLE foo.table3 ( id INT NOT NULL, num1 SMALLINT, num3 SMALLINT, num5 INT, num9 BIGINT, num19 DECIMAL(19), numAB DECIMAL(10,2) );\n",
         'NUMBER type conversions';
 
-    throws-like { $xlate.parse( 'CREATE TABLE foo ( id NUMBER(39));' ) },
-        Exception, message => /'Out of range'/;
+    is $xlate.parse( 'CREATE TABLE foo.floats ( col_a FLOAT );'),
+                     "CREATE TABLE foo.floats ( col_a DOUBLE PRECISION );\n",
+        'FLOAT becomes DOUBLE PRECISION';
 
     throws-like { $xlate.parse( 'CREATE TABLE foo ( id NUMBER(39,2));' ) },
         Exception, message => /'Out of range'/;
