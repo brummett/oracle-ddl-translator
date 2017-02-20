@@ -4,13 +4,13 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
-plan 2;
+plan 3;
 
 my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new);
 ok $xlate, 'created translator';
 
 subtest 'basic' => {
-    plan 4;
+    plan 2;
 
     is $xlate.parse( q :to<ORACLE> ),
         CREATE TABLE foo.table1
@@ -32,6 +32,10 @@ subtest 'basic' => {
         ORACLE
         "CREATE TABLE foo.table2 ( id VARCHAR(10) NOT NULL PRIMARY KEY, name VARCHAR(20) NOT NULL );\n",
         'with NOT NULL constraint';
+}
+
+subtest 'NUMBER' => {
+    plan 2;
 
     is $xlate.parse( q :to<ORACLE> ),
         CREATE TABLE foo.table3 (
