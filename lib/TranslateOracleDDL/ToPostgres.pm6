@@ -65,7 +65,7 @@ class TranslateOracleDDL::ToPostgres {
     method column-type:sym<VARCHAR2> ($/)   { make $<integer> ?? "VARCHAR($<integer>)" !! "VARCHAR" }
 
     my subset out-of-range of Int where { $_ < 0 or $_ > 38 };
-    method column-type:sym<NUMBER> ($/)     {
+    method column-type:sym<NUMBER-with-prec> ($/)     {
         given $<integer>.Int {
             when 1 ..^ 3    { make 'SMALLINT' }
             when 3 ..^ 5    { make 'SMALLINT' }

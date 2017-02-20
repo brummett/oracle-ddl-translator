@@ -62,7 +62,7 @@ grammar TranslateOracleDDL::Grammar {
     proto rule column-type { * }
     rule column-type:sym<VARCHAR2>          { 'VARCHAR2'    [ '(' <integer> ')' ]? }
     rule column-type:sym<NUMBER-with-scale> { 'NUMBER' '(' <integer> ',' <integer> ')' }
-    rule column-type:sym<NUMBER>            { 'NUMBER'      [ '(' <integer> ')' ]? }
+    rule column-type:sym<NUMBER-with-prec>  { 'NUMBER' [ '(' <integer> ')' ]? }
     rule column-type:sym<FLOAT>             { 'FLOAT' }
     rule column-type:sym<INTEGER>           { 'INTEGER' }
     rule column-type:sym<DATE>              { 'DATE' }
