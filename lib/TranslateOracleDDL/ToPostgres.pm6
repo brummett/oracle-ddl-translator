@@ -64,14 +64,15 @@ class TranslateOracleDDL::ToPostgres {
     # data types
     method column-type:sym<VARCHAR2> ($/)   { make $<integer> ?? "VARCHAR($<integer>)" !! "VARCHAR" }
     method column-type:sym<NUMBER> ($/)     {
+        my subset out-of-range of Int where { $_ < 0 or $_ > 38 };
         given $<integer>.Int {
             when 1 ..^ 3    { make 'SMALLINT' }
             when 3 ..^ 5    { make 'SMALLINT' }
             when 5 ..^ 9    { make 'INT' }
             when 9 ..^ 19   { make 'BIGINT' }
             when 19 .. 38   { make "DECIMAL($<integer>)" }
-            when Int        { make 'INT' }
-            default         { die "Can't handle NUMBER($<integer>)" }
+            when out-of-range { die "Can't handle NUMBER($<integer>): Out of range 1..38" }
+            default         { make 'INT' }
         }
     }
     method column-type:sym<DATE> ($/)       { make "TIMESTAMP(0)" }

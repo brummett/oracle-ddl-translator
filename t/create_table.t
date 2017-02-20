@@ -10,7 +10,7 @@ my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.
 ok $xlate, 'created translator';
 
 subtest 'basic' => {
-    plan 3;
+    plan 4;
 
     is $xlate.parse( q :to<ORACLE> ),
         CREATE TABLE foo.table1
@@ -45,4 +45,7 @@ subtest 'basic' => {
         ORACLE
         "CREATE TABLE foo.table3 ( id INT NOT NULL, num1 SMALLINT, num3 SMALLINT, num5 INT, num9 BIGINT, num19 DECIMAL(19) );\n",
         'NUMBER type conversions';
+
+    throws-like { $xlate.parse( 'CREATE TABLE foo ( id NUMBER(39));' ) },
+        Exception, message => /'Out of range'/;
 }
