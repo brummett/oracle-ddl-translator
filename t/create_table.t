@@ -4,7 +4,7 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
-plan 4;
+plan 5;
 
 my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new);
 ok $xlate, 'created translator';
@@ -63,5 +63,13 @@ subtest 'CHAR' => {
 
     is $xlate.parse( 'CREATE TABLE foo.chartable ( id CHAR(1), thing CHAR(2) );'),
         "CREATE TABLE foo.chartable ( id CHAR(1), thing CHAR(2) );\n",
+        'create table';
+}
+
+subtest 'LOB' => {
+    plan 1;
+
+    is $xlate.parse('CREATE TABLE foo.lobs ( col_a BLOB, col_b CLOB );'),
+        "CREATE TABLE foo.lobs ( col_a BYTEA, col_b TEXT );\n",
         'create table';
 }
