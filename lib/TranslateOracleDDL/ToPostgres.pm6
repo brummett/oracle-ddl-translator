@@ -84,6 +84,7 @@ class TranslateOracleDDL::ToPostgres {
     }
 
     method column-type:sym<DATE> ($/)       { make "TIMESTAMP(0)" }
+    method column-type:sym<CHAR> ($/)       { make "CHAR($<integer>)" }
 
     method create-table-column-constraint:sym<NOT-NULL> ($/) { make 'NOT NULL' }
     method create-table-column-constraint:sym<PRIMARY-KEY> ($/) { make 'PRIMARY KEY' }

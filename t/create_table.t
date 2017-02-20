@@ -4,7 +4,7 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
-plan 3;
+plan 4;
 
 my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new);
 ok $xlate, 'created translator';
@@ -56,4 +56,12 @@ subtest 'NUMBER' => {
 
     throws-like { $xlate.parse( 'CREATE TABLE foo ( id NUMBER(39,2));' ) },
         Exception, message => /'Out of range'/;
+}
+
+subtest 'CHAR' => {
+    plan 1;
+
+    is $xlate.parse( 'CREATE TABLE foo.chartable ( id CHAR(1), thing CHAR(2) );'),
+        "CREATE TABLE foo.chartable ( id CHAR(1), thing CHAR(2) );\n",
+        'create table';
 }
