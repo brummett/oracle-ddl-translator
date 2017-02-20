@@ -67,5 +67,20 @@ grammar TranslateOracleDDL::Grammar {
     proto rule create-table-column-constraint { * }
     rule create-table-column-constraint:sym<NOT-NULL> { 'NOT NULL' }
     rule create-table-column-constraint:sym<PRIMARY-KEY> { 'PRIMARY KEY' }
+
+    rule sql-statement:sym<SELECT> {
+        'SELECT'
+        <select-column-list>
+        ['FROM'|'from'] <rest-of-select>
+    }
+
+    rule select-column-list { <select-column-def>+ % ',' }
+
+    proto rule select-column-def { * }
+    rule select-column-def:sym<COLUMN-NAME> { <identifier> }
+    rule select-column-def:sym<QUOTED-COLUMN-NAME> { '"' <identifier> '"' }
+
+    rule rest-of-select { [ <string-to-end-of-line> ]? }
+
 }
 
