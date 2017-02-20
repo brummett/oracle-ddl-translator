@@ -41,9 +41,10 @@ subtest 'basic' => {
             , num5  NUMBER  (5)
             , num9  NUMBER  (9)
             , num19 NUMBER  (19)
+            , numAB NUMBER  (10,2)
             );
         ORACLE
-        "CREATE TABLE foo.table3 ( id INT NOT NULL, num1 SMALLINT, num3 SMALLINT, num5 INT, num9 BIGINT, num19 DECIMAL(19) );\n",
+        "CREATE TABLE foo.table3 ( id INT NOT NULL, num1 SMALLINT, num3 SMALLINT, num5 INT, num9 BIGINT, num19 DECIMAL(19), numAB DECIMAL(10,2) );\n",
         'NUMBER type conversions';
 
     throws-like { $xlate.parse( 'CREATE TABLE foo ( id NUMBER(39));' ) },

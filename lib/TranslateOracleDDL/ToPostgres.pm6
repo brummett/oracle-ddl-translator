@@ -63,8 +63,9 @@ class TranslateOracleDDL::ToPostgres {
 
     # data types
     method column-type:sym<VARCHAR2> ($/)   { make $<integer> ?? "VARCHAR($<integer>)" !! "VARCHAR" }
+
+    my subset out-of-range of Int where { $_ < 0 or $_ > 38 };
     method column-type:sym<NUMBER> ($/)     {
-        my subset out-of-range of Int where { $_ < 0 or $_ > 38 };
         given $<integer>.Int {
             when 1 ..^ 3    { make 'SMALLINT' }
             when 3 ..^ 5    { make 'SMALLINT' }
@@ -75,8 +76,16 @@ class TranslateOracleDDL::ToPostgres {
             default         { make 'INT' }
         }
     }
+    method column-type:sym<NUMBER-with-scale> ($/) {
+        my ($precision, $scale) = $<integer>;
+        die "Can't handle NUMBER($<integer>): Out of range 1..38" if $precision ~~ out-of-range;
+
+        make "DECIMAL($precision,$scale)";
+    }
+
     method column-type:sym<DATE> ($/)       { make "TIMESTAMP(0)" }
 
     method create-table-column-constraint:sym<NOT-NULL> ($/) { make 'NOT NULL' }
     method create-table-column-constraint:sym<PRIMARY-KEY> ($/) { make 'PRIMARY KEY' }
 }
+
