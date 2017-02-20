@@ -1,8 +1,5 @@
 use v6;
 
-use TranslateOracleDDL::Remark;
-use TranslateOracleDDL::Prompt;
-
 grammar TranslateOracleDDL::Grammar {
     token TOP {
         <sql-statement>+
