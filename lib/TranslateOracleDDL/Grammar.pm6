@@ -27,7 +27,7 @@ grammar TranslateOracleDDL::Grammar {
     token bigint { \d+ }
     token integer { \d+ }
     token entity-name {
-        [ <identifier> '.' ]? <identifier>  # either "name" or "schema.name"
+        <identifier>** 1..3 % '.' # accepts "name" or "table.name" or "schema.table.name"
     }
 
     proto token value { * }
@@ -43,7 +43,6 @@ grammar TranslateOracleDDL::Grammar {
     proto token entity-type { * }
     token entity-type:sym<TABLE> { <sym> }
     token entity-type:sym<COLUMN> { <sym> }
-    token entity-type:sym<OPERATOR> { <sym> }
 
     rule sql-statement:sym<COMMENT-ON> {
         'COMMENT' 'ON' <entity-type> <entity-name> 'IS' <value> ';'

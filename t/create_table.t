@@ -146,9 +146,13 @@ subtest 'oracle-only add-ons' => {
 }
 
 subtest 'COMMENT ON' => {
-    plan 1;
+    plan 2;
 
     is $xlate.parse("COMMENT ON TABLE foo.comment IS 'hi there';"),
         "COMMENT ON TABLE foo.comment IS 'hi there';\n",
         'table';
+
+    is $xlate.parse("COMMENT ON COLUMN schema.foo.comment IS 'hi there';"),
+        "COMMENT ON COLUMN schema.foo.comment IS 'hi there';\n",
+        'column';
 }
