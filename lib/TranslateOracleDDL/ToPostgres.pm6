@@ -50,8 +50,12 @@ class TranslateOracleDDL::ToPostgres {
     method create-sequence-clause:sym<ORDER> ($/)       { make '' }
     method create-sequence-clause:sym<NOORDER> ($/)     { make '' }
 
+    method value:sym<number-value> ($/)             { make "$/" }
+    method value:sym<string-value> ($/)             { make "$/" }
+    method value:sym<systimestamp-function> ($/)    { make 'LOCALTIMESTAMP' }
+
     method sql-statement:sym<COMMENT-ON> ($/) {
-        make "COMMENT ON $<entity-type> $<entity-name> IS $<value>"
+        make "COMMENT ON $<entity-type> $<entity-name> IS { $<value>.made }"
     }
 
     method sql-statement:sym<CREATE-TABLE> ($/) {
@@ -101,7 +105,7 @@ class TranslateOracleDDL::ToPostgres {
 
     method create-table-column-constraint:sym<NOT-NULL> ($/) { make 'NOT NULL' }
     method create-table-column-constraint:sym<PRIMARY-KEY> ($/) { make 'PRIMARY KEY' }
-    method create-table-column-constraint:sym<DEFAULT> ($/) { make "DEFAULT $<value>" }
+    method create-table-column-constraint:sym<DEFAULT> ($/) { make "DEFAULT { $<value>.made }" }
 
     method table-constraint-def ($/)        { make "CONSTRAINT $<identifier> { $<table-constraint>.made }" }
     method table-constraint:sym<PRIMARY-KEY> ($/) { make "PRIMARY KEY ( { $<identifier>.join(', ') } )" }

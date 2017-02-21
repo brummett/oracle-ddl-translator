@@ -28,10 +28,11 @@ subtest 'basic' => {
                 id          VARCHAR2(10)    NOT NULL PRIMARY KEY,
                 name        VARCHAR2(20)    NOT NULL,
                 num         VARCHAR2        DEFAULT 123,
-                str         VARCHAR2        DEFAULT 'a string'
+                str         VARCHAR2        DEFAULT 'a string',
+                ts          TIMESTAMP(6)    DEFAULT systimestamp
             );
         ORACLE
-        "CREATE TABLE foo.table2 ( id VARCHAR(10) NOT NULL PRIMARY KEY, name VARCHAR(20) NOT NULL, num VARCHAR DEFAULT 123, str VARCHAR DEFAULT 'a string' );\n",
+        "CREATE TABLE foo.table2 ( id VARCHAR(10) NOT NULL PRIMARY KEY, name VARCHAR(20) NOT NULL, num VARCHAR DEFAULT 123, str VARCHAR DEFAULT 'a string', ts TIMESTAMP(6) DEFAULT LOCALTIMESTAMP );\n",
         'column constraints';
 }
 

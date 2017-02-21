@@ -39,6 +39,7 @@ grammar TranslateOracleDDL::Grammar {
         ]*
         "'"
     }
+    token value:sym<systimestamp-function> { 'systimestamp' }
 
     proto token entity-type { * }
     token entity-type:sym<TABLE> { <sym> }
