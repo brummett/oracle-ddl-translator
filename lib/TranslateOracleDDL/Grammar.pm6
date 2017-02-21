@@ -35,7 +35,7 @@ grammar TranslateOracleDDL::Grammar {
     token value:sym<string-value> {
         "'"
         [ <-[']>+:
-            | [ <after \\ > "'" ]
+            | "''"
         ]*
         "'"
     }

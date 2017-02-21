@@ -148,7 +148,7 @@ subtest 'oracle-only add-ons' => {
 }
 
 subtest 'COMMENT ON' => {
-    plan 2;
+    plan 3;
 
     is $xlate.parse("COMMENT ON TABLE foo.comment IS 'hi there';"),
         "COMMENT ON TABLE foo.comment IS 'hi there';\n",
@@ -157,4 +157,8 @@ subtest 'COMMENT ON' => {
     is $xlate.parse("COMMENT ON COLUMN schema.foo.comment IS 'hi there';"),
         "COMMENT ON COLUMN schema.foo.comment IS 'hi there';\n",
         'column';
+
+    is $xlate.parse("COMMENT ON COLUMN a.b.c IS 'this string''s funky';"),
+        "COMMENT ON COLUMN a.b.c IS 'this string''s funky';\n",
+        'string with embedded quote';
 }
