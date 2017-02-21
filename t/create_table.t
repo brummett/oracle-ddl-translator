@@ -61,6 +61,9 @@ subtest 'numbers' => {
                      "CREATE TABLE foo.floats ( col_a DOUBLE PRECISION );\n",
         'FLOAT becomes DOUBLE PRECISION';
 
+    throws-like { $xlate.parse( 'CREATE TABLE foo ( id NUMBER(39));' ) },
+        Exception, message => /'Out of range'/;
+
     throws-like { $xlate.parse( 'CREATE TABLE foo ( id NUMBER(39,2));' ) },
         Exception, message => /'Out of range'/;
 }
