@@ -4,7 +4,7 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
-plan 8;
+plan 9;
 
 my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new);
 ok $xlate, 'created translator';
@@ -143,4 +143,12 @@ subtest 'oracle-only add-ons' => {
         ORACLE
         "CREATE TABLE foo.addon2 ( col_a VARCHAR );\n",
         '3 add-ons';
+}
+
+subtest 'COMMENT ON' => {
+    plan 1;
+
+    is $xlate.parse("COMMENT ON TABLE foo.comment IS 'hi there';"),
+        "COMMENT ON TABLE foo.comment IS 'hi there';\n",
+        'table';
 }

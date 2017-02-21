@@ -40,6 +40,15 @@ grammar TranslateOracleDDL::Grammar {
         "'"
     }
 
+    proto token entity-type { * }
+    token entity-type:sym<TABLE> { <sym> }
+    token entity-type:sym<COLUMN> { <sym> }
+    token entity-type:sym<OPERATOR> { <sym> }
+
+    rule sql-statement:sym<COMMENT-ON> {
+        'COMMENT' 'ON' <entity-type> <entity-name> 'IS' <value> ';'
+    }
+
     token sql-statement:sym<CREATE-SEQUENCE> {
         'CREATE SEQUENCE' <ws> <entity-name> [ <ws> <create-sequence-clause> ]* <ws>*? ';'
     }

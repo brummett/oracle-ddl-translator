@@ -50,6 +50,10 @@ class TranslateOracleDDL::ToPostgres {
     method create-sequence-clause:sym<ORDER> ($/)       { make '' }
     method create-sequence-clause:sym<NOORDER> ($/)     { make '' }
 
+    method sql-statement:sym<COMMENT-ON> ($/) {
+        make "COMMENT ON $<entity-type> $<entity-name> IS $<value>"
+    }
+
     method sql-statement:sym<CREATE-TABLE> ($/) {
         my @columns = $<create-table-column-def>>>.made;
         my @constraints = $<table-constraint-def>>>.made;
