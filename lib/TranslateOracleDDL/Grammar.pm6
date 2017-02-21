@@ -23,7 +23,7 @@ grammar TranslateOracleDDL::Grammar {
         \v+
     }
 
-    token identifier { \w+ }
+    token identifier { (\w+) <?{ $0 ne 'CONSTRAINT' }> }
     token bigint { \d+ }
     token integer { \d+ }
     token entity-name {
@@ -53,6 +53,7 @@ grammar TranslateOracleDDL::Grammar {
         <entity-name>
         '('
             <create-table-column-def>+ % ','
+            [ ',' <table-constraint-def> ]*
         ')'
         ';'
     }
@@ -77,5 +78,10 @@ grammar TranslateOracleDDL::Grammar {
     proto rule create-table-column-constraint { * }
     rule create-table-column-constraint:sym<NOT-NULL> { 'NOT NULL' }
     rule create-table-column-constraint:sym<PRIMARY-KEY> { 'PRIMARY KEY' }
+
+    rule table-constraint-def { 'CONSTRAINT' <identifier> <table-constraint> }
+
+    proto rule table-constraint { * }
+    rule table-constraint:sym<PRIMARY-KEY> { 'PRIMARY' 'KEY' '(' [ <identifier> + % ',' ] ')' }
 }
 

@@ -52,7 +52,8 @@ class TranslateOracleDDL::ToPostgres {
 
     method sql-statement:sym<CREATE-TABLE> ($/) {
         my @columns = $<create-table-column-def>>>.made;
-        make "CREATE TABLE $<entity-name> ( " ~ @columns.join(', ') ~ " )"
+        my @constraints = $<table-constraint-def>>>.made;
+        make "CREATE TABLE $<entity-name> ( " ~ (|@columns, |@constraints).join(', ') ~ " )"
     }
 
     method create-table-column-def ($/) {
@@ -96,5 +97,8 @@ class TranslateOracleDDL::ToPostgres {
 
     method create-table-column-constraint:sym<NOT-NULL> ($/) { make 'NOT NULL' }
     method create-table-column-constraint:sym<PRIMARY-KEY> ($/) { make 'PRIMARY KEY' }
+
+    method table-constraint-def ($/)        { make "CONSTRAINT $<identifier> { $<table-constraint>.made }" }
+    method table-constraint:sym<PRIMARY-KEY> ($/) { make "PRIMARY KEY ( { $<identifier>.join(', ') } )" }
 }
 
