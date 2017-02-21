@@ -80,7 +80,7 @@ grammar TranslateOracleDDL::Grammar {
     rule create-table-column-def { <identifier> <column-type> <create-table-column-constraint>* }
 
     rule create-table-extra-oracle-stuff {
-        [ 'ORGANIZATION' [ 'HEAP' | 'INDEX' ] ]
+        [ 'ORGANIZATION' [ 'HEAP' | 'INDEX' ]? ]
         | 'MONITORING'
         | 'OVERFLOW'
     }

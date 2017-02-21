@@ -138,6 +138,7 @@ subtest 'oracle-only add-ons' => {
             col_a VARCHAR2
         )
         ORGANIZATION    HEAP
+        ORGANIZATION
         MONITORING
         OVERFLOW;
         ORACLE
