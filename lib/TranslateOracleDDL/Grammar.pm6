@@ -23,7 +23,7 @@ grammar TranslateOracleDDL::Grammar {
         \v+
     }
 
-    token identifier { (\w+) <?{ $0 ne 'CONSTRAINT' }> }
+    token identifier { \w+ }
     token bigint { \d+ }
     token integer { \d+ }
     token entity-name {
@@ -71,7 +71,7 @@ grammar TranslateOracleDDL::Grammar {
         'CREATE TABLE'
         <entity-name>
         '('
-            <create-table-column-def>+ % ','
+            <create-table-column-def>+? % ','
             [ ',' <table-constraint-def> ]*
         ')'
         <create-table-extra-oracle-stuff>*
