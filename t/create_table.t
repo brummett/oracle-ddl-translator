@@ -4,7 +4,7 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
-plan 7;
+plan 8;
 
 my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new);
 ok $xlate, 'created translator';
@@ -117,4 +117,30 @@ subtest 'table constraints' => {
         ORACLE
         "CREATE TABLE foo.table_constr ( col_a VARCHAR, col_b VARCHAR, CONSTRAINT constr_name PRIMARY KEY ( col_a, col_b ) );\n",
         '2-column PRIMARY KEY';
+}
+
+subtest 'oracle-only add-ons' => {
+    plan 2;
+
+    is $xlate.parse( q :to<ORACLE> ),
+        CREATE TABLE foo.addon1
+        (
+            col_a VARCHAR2
+        )
+        ORGANIZATION    INDEX;
+        ORACLE
+        "CREATE TABLE foo.addon1 ( col_a VARCHAR );\n",
+        'ORGANIZATION INDEX';
+
+    is $xlate.parse( q :to<ORACLE> ),
+        CREATE TABLE foo.addon2
+        (
+            col_a VARCHAR2
+        )
+        ORGANIZATION    HEAP
+        MONITORING
+        OVERFLOW;
+        ORACLE
+        "CREATE TABLE foo.addon2 ( col_a VARCHAR );\n",
+        '3 add-ons';
 }

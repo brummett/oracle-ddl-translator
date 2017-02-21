@@ -65,10 +65,17 @@ grammar TranslateOracleDDL::Grammar {
             <create-table-column-def>+ % ','
             [ ',' <table-constraint-def> ]*
         ')'
+        <create-table-extra-oracle-stuff>*
         ';'
     }
 
     rule create-table-column-def { <identifier> <column-type> <create-table-column-constraint>* }
+
+    rule create-table-extra-oracle-stuff {
+        [ 'ORGANIZATION' [ 'HEAP' | 'INDEX' ] ]
+        | 'MONITORING'
+        | 'OVERFLOW'
+    }
 
     proto rule column-type { * }
     rule column-type:sym<VARCHAR2>          { 'VARCHAR2'    [ '(' <integer> ')' ]? }
