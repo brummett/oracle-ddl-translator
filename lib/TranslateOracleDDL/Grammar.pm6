@@ -30,6 +30,16 @@ grammar TranslateOracleDDL::Grammar {
         [ <identifier> '.' ]? <identifier>  # either "name" or "schema.name"
     }
 
+    proto token value { * }
+    token value:sym<number-value> { \d+ }
+    token value:sym<string-value> {
+        "'"
+        [ <-[']>+:
+            | [ <after \\ > "'" ]
+        ]*
+        "'"
+    }
+
     token sql-statement:sym<CREATE-SEQUENCE> {
         'CREATE SEQUENCE' <ws> <entity-name> [ <ws> <create-sequence-clause> ]* <ws>*? ';'
     }
@@ -78,6 +88,7 @@ grammar TranslateOracleDDL::Grammar {
     proto rule create-table-column-constraint { * }
     rule create-table-column-constraint:sym<NOT-NULL> { 'NOT NULL' }
     rule create-table-column-constraint:sym<PRIMARY-KEY> { 'PRIMARY KEY' }
+    rule create-table-column-constraint:sym<DEFAULT> { 'DEFAULT' <value> }
 
     rule table-constraint-def { 'CONSTRAINT' <identifier> <table-constraint> }
 
