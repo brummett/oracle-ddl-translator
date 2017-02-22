@@ -106,6 +106,13 @@ grammar TranslateOracleDDL::Grammar {
     rule create-table-column-constraint:sym<NOT-NULL> { 'NOT NULL' }
     rule create-table-column-constraint:sym<PRIMARY-KEY> { 'PRIMARY KEY' }
 
+    rule create-table-column-constraint:sym<DEFAULT> { 'DEFAULT' <value> }
+
+    rule table-constraint-def { 'CONSTRAINT' <identifier> <table-constraint> }
+
+    proto rule table-constraint { * }
+    rule table-constraint:sym<PRIMARY-KEY> { 'PRIMARY' 'KEY' '(' [ <identifier> + % ',' ] ')' }
+
     rule sql-statement:sym<SELECT> {
         'SELECT'
         <select-column-list>
@@ -119,12 +126,5 @@ grammar TranslateOracleDDL::Grammar {
     rule select-column-def:sym<QUOTED-COLUMN-NAME> { '"' <identifier> '"' }
 
     rule rest-of-select { [ <string-to-end-of-line> ]? }
-
-    rule create-table-column-constraint:sym<DEFAULT> { 'DEFAULT' <value> }
-
-    rule table-constraint-def { 'CONSTRAINT' <identifier> <table-constraint> }
-
-    proto rule table-constraint { * }
-    rule table-constraint:sym<PRIMARY-KEY> { 'PRIMARY' 'KEY' '(' [ <identifier> + % ',' ] ')' }
 }
 
