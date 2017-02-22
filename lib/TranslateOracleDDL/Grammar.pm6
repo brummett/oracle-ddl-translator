@@ -126,5 +126,17 @@ grammar TranslateOracleDDL::Grammar {
     rule select-column-def:sym<QUOTED-COLUMN-NAME> { '"' <identifier> '"' }
 
     rule rest-of-select { [ <string-to-end-of-line> ]? }
+
+    # Views
+
+    rule sql-statement:sym<VIEW> {
+        'CREATE OR REPLACE VIEW'
+        <view-table-def>
+        'AS'
+        <sql-statement>
+    }
+
+    rule view-table-def { <entity-name> }
+    
 }
 
