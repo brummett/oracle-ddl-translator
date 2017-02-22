@@ -1,4 +1,5 @@
 use v6;
+use Grammar::Tracer;
 
 grammar TranslateOracleDDL::Grammar {
     token TOP {
