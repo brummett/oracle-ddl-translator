@@ -106,6 +106,10 @@ class TranslateOracleDDL::ToPostgres {
     method create-table-column-constraint:sym<NOT-NULL> ($/) { make 'NOT NULL' }
     method create-table-column-constraint:sym<PRIMARY-KEY> ($/) { make 'PRIMARY KEY' }
 
+    method create-table-column-constraint:sym<DEFAULT> ($/) { make "DEFAULT { $<value>.made }" }
+
+    method table-constraint-def ($/)        { make "CONSTRAINT $<identifier> { $<table-constraint>.made }" }
+    method table-constraint:sym<PRIMARY-KEY> ($/) { make "PRIMARY KEY ( { $<identifier>.join(', ') } )" }
 
     method sql-statement:sym<SELECT> ($/) {
         make "SELECT $<select-column-list>FROM $<rest-of-select>"
@@ -120,9 +124,5 @@ class TranslateOracleDDL::ToPostgres {
     #method select-column-def:sym<COLUMN-NAME>        ($/) { make $<identifier> }
     #method select-column-def:sym<QUOTED-COLUMN-NAME> ($/) { make $<identifier> }
 
-    method create-table-column-constraint:sym<DEFAULT> ($/) { make "DEFAULT { $<value>.made }" }
-
-    method table-constraint-def ($/)        { make "CONSTRAINT $<identifier> { $<table-constraint>.made }" }
-    method table-constraint:sym<PRIMARY-KEY> ($/) { make "PRIMARY KEY ( { $<identifier>.join(', ') } )" }
 }
 
