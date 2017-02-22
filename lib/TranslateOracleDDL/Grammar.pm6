@@ -27,7 +27,26 @@ grammar TranslateOracleDDL::Grammar {
     token bigint { \d+ }
     token integer { \d+ }
     token entity-name {
-        [ <identifier> '.' ]? <identifier>  # either "name" or "schema.name"
+        <identifier>** 1..3 % '.' # accepts "name" or "table.name" or "schema.table.name"
+    }
+
+    proto token value { * }
+    token value:sym<number-value> { \d+ }
+    token value:sym<string-value> {
+        "'"
+        [ <-[']>+:
+            | "''"
+        ]*
+        "'"
+    }
+    token value:sym<systimestamp-function> { 'systimestamp' }
+
+    proto token entity-type { * }
+    token entity-type:sym<TABLE> { <sym> }
+    token entity-type:sym<COLUMN> { <sym> }
+
+    rule sql-statement:sym<COMMENT-ON> {
+        'COMMENT' 'ON' <entity-type> <entity-name> 'IS' <value> ';'
     }
 
     token sql-statement:sym<CREATE-SEQUENCE> {
@@ -51,18 +70,36 @@ grammar TranslateOracleDDL::Grammar {
     rule sql-statement:sym<CREATE-TABLE> {
         'CREATE TABLE'
         <entity-name>
-        '(' <create-table-column-list> ')'
+        '('
+            <create-table-column-def>+? % ','
+            [ ',' <table-constraint-def> ]*
+        ')'
+        <create-table-extra-oracle-stuff>*
         ';'
     }
 
-    rule create-table-column-list { <create-table-column-def>+ % ',' }
-
     rule create-table-column-def { <identifier> <column-type> <create-table-column-constraint>* }
 
+    rule create-table-extra-oracle-stuff {
+        [ 'ORGANIZATION' [ 'HEAP' | 'INDEX' ]? ]
+        | 'MONITORING'
+        | 'OVERFLOW'
+    }
+
     proto rule column-type { * }
-    rule column-type:sym<VARCHAR2>  { 'VARCHAR2'    [ '(' <integer> ')' ]? }
-    rule column-type:sym<NUMBER>    { 'NUMBER'      [ '(' <integer> ')' ]? }
-    rule column-type:sym<DATE>      { 'DATE' }
+    rule column-type:sym<VARCHAR2>          { 'VARCHAR2'    [ '(' <integer> ')' ]? }
+    rule column-type:sym<NUMBER-with-scale> { 'NUMBER' '(' <integer> ',' <integer> ')' }
+    rule column-type:sym<NUMBER-with-prec>  { 'NUMBER' '(' <integer> ')' }
+    rule column-type:sym<NUMBER>            { 'NUMBER' }
+    rule column-type:sym<FLOAT>             { 'FLOAT' }
+    rule column-type:sym<INTEGER>           { 'INTEGER' }
+    rule column-type:sym<DATE>              { 'DATE' }
+    rule column-type:sym<TIMESTAMP>         { 'TIMESTAMP' '(' <integer> ')' }
+    rule column-type:sym<CHAR>              { 'CHAR' '(' <integer> ')' }
+    rule column-type:sym<BLOB>              { 'BLOB' }
+    rule column-type:sym<CLOB>              { 'CLOB' }
+    rule column-type:sym<LONG>              { 'LONG' }
+    rule column-type:sym<RAW>               { 'RAW' '(' <integer> ')' }
 
     proto rule create-table-column-constraint { * }
     rule create-table-column-constraint:sym<NOT-NULL> { 'NOT NULL' }
@@ -82,5 +119,11 @@ grammar TranslateOracleDDL::Grammar {
 
     rule rest-of-select { [ <string-to-end-of-line> ]? }
 
+    rule create-table-column-constraint:sym<DEFAULT> { 'DEFAULT' <value> }
+
+    rule table-constraint-def { 'CONSTRAINT' <identifier> <table-constraint> }
+
+    proto rule table-constraint { * }
+    rule table-constraint:sym<PRIMARY-KEY> { 'PRIMARY' 'KEY' '(' [ <identifier> + % ',' ] ')' }
 }
 

@@ -50,11 +50,20 @@ class TranslateOracleDDL::ToPostgres {
     method create-sequence-clause:sym<ORDER> ($/)       { make '' }
     method create-sequence-clause:sym<NOORDER> ($/)     { make '' }
 
-    method sql-statement:sym<CREATE-TABLE> ($/) {
-        make "CREATE TABLE $<entity-name> ( " ~ $<create-table-column-list>.made ~ " )"
+    method value:sym<number-value> ($/)             { make "$/" }
+    method value:sym<string-value> ($/)             { make "$/" }
+    method value:sym<systimestamp-function> ($/)    { make 'LOCALTIMESTAMP' }
+
+    method sql-statement:sym<COMMENT-ON> ($/) {
+        make "COMMENT ON $<entity-type> $<entity-name> IS { $<value>.made }"
     }
 
-    method create-table-column-list ($/) { make $<create-table-column-def>>>.made.join(', ') }
+    method sql-statement:sym<CREATE-TABLE> ($/) {
+        my @columns = $<create-table-column-def>>>.made;
+        my @constraints = $<table-constraint-def>>>.made;
+        make "CREATE TABLE $<entity-name> ( " ~ (|@columns, |@constraints).join(', ') ~ " )"
+    }
+
     method create-table-column-def ($/) {
         my @parts = ( $<identifier>, $<column-type>.made );
         @parts.push( $<create-table-column-constraint>>>.made ) if $<create-table-column-constraint>;
@@ -63,8 +72,36 @@ class TranslateOracleDDL::ToPostgres {
 
     # data types
     method column-type:sym<VARCHAR2> ($/)   { make $<integer> ?? "VARCHAR($<integer>)" !! "VARCHAR" }
-    method column-type:sym<NUMBER> ($/)     { make $<integer> ?? "INT($<integer>)" !! "INT" }
+
+    my subset out-of-range of Int where { $_ < 0 or $_ > 38 };
+    method column-type:sym<NUMBER-with-prec> ($/)     {
+        given $<integer>.Int {
+            when 1 ..^ 3    { make 'SMALLINT' }
+            when 3 ..^ 5    { make 'SMALLINT' }
+            when 5 ..^ 9    { make 'INT' }
+            when 9 ..^ 19   { make 'BIGINT' }
+            when 19 .. 38   { make "DECIMAL($<integer>)" }
+            when out-of-range { die "Can't handle NUMBER($<integer>): Out of range 1..38" }
+            default         { make 'INT' }
+        }
+    }
+    method column-type:sym<NUMBER-with-scale> ($/) {
+        my ($precision, $scale) = $<integer>;
+        die "Can't handle NUMBER($precision): Out of range 1..38" if $precision.Int ~~ out-of-range;
+
+        make "DECIMAL($precision,$scale)";
+    }
+    method column-type:sym<NUMBER> ($/)     { make 'DOUBLE PRECISION' }
+
     method column-type:sym<DATE> ($/)       { make "TIMESTAMP(0)" }
+    method column-type:sym<TIMESTAMP> ($/)  { make "TIMESTAMP($<integer>)"; }
+    method column-type:sym<CHAR> ($/)       { make "CHAR($<integer>)" }
+    method column-type:sym<BLOB> ($/)       { make 'BYTEA' }
+    method column-type:sym<RAW> ($/)        { make 'BYTEA' }
+    method column-type:sym<CLOB> ($/)       { make 'TEXT' }
+    method column-type:sym<LONG> ($/)       { make 'TEXT' }
+    method column-type:sym<FLOAT> ($/)      { make 'DOUBLE PRECISION' }
+    method column-type:sym<INTEGER> ($/)    { make 'DECIMAL(38)' }
 
     method create-table-column-constraint:sym<NOT-NULL> ($/) { make 'NOT NULL' }
     method create-table-column-constraint:sym<PRIMARY-KEY> ($/) { make 'PRIMARY KEY' }
@@ -83,4 +120,9 @@ class TranslateOracleDDL::ToPostgres {
     #method select-column-def:sym<COLUMN-NAME>        ($/) { make $<identifier> }
     #method select-column-def:sym<QUOTED-COLUMN-NAME> ($/) { make $<identifier> }
 
+    method create-table-column-constraint:sym<DEFAULT> ($/) { make "DEFAULT { $<value>.made }" }
+
+    method table-constraint-def ($/)        { make "CONSTRAINT $<identifier> { $<table-constraint>.made }" }
+    method table-constraint:sym<PRIMARY-KEY> ($/) { make "PRIMARY KEY ( { $<identifier>.join(', ') } )" }
 }
+
