@@ -130,9 +130,13 @@ grammar TranslateOracleDDL::Grammar {
     # Views
 
     rule sql-statement:sym<VIEW> {
+        #{say "Starting VIEW consumption ";
+        # say $¢.orig().substr($¢.pos()) }
         'CREATE OR REPLACE VIEW'
         <view-table-def>
+        '(' <select-column-list> ')'
         'AS'
+        #{say "AS looks like $3 " ~ $3.postmatch }
         <sql-statement>
     }
 

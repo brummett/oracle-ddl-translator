@@ -13,13 +13,8 @@ subtest 'SELECT' => {
     plan 1;
 
     is $xlate.parse(q:to<ORACLE>,
-CREATE OR REPLACE VIEW SCHEMA_USER.foo
-(
-    foo_name
-)
-AS
-SELECT "FOO"
-from SCHEMA_USER.foo;
+CREATE OR REPLACE VIEW SCHEMA_USER.foo ( foo_name ) AS
+SELECT "FOO" from SCHEMA_USER.foo
 ORACLE
                     ),
                     q:to<ORACLE>,
