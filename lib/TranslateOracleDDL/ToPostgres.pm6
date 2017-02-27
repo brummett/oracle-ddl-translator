@@ -107,8 +107,18 @@ class TranslateOracleDDL::ToPostgres {
     method create-table-column-constraint:sym<PRIMARY-KEY> ($/) { make 'PRIMARY KEY' }
     method create-table-column-constraint:sym<DEFAULT> ($/) { make "DEFAULT { $<value>.made }" }
 
-    method table-constraint-def ($/)        { make "CONSTRAINT $<identifier> { $<table-constraint>.made }" }
+    method table-constraint-def ($/)        {
+        my @parts = ('CONSTRAINT', $<identifier>, $<table-constraint>.made);
+        if @<constraint-deferrables>.elems {
+            @parts.push: @<constraint-deferrables>>>.made.grep({ $_ });
+        }
+        make @parts.join(' ');
+    }
+
     method table-constraint:sym<PRIMARY-KEY> ($/) { make "PRIMARY KEY ( { $<identifier>.join(', ') } )" }
+
+    method constraint-deferrables:sym<DEFERRABLE> ($/) { make $/ }
+    method constraint-deferrables:sym<INITIALLY> ($/)  { make $/ }
 
     method sql-statement:sym<ALTER-TABLE> ($/) {
         make "ALTER TABLE $<entity-name> " ~ $<alter-table-action>.made;
