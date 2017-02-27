@@ -110,5 +110,19 @@ grammar TranslateOracleDDL::Grammar {
 
     proto rule table-constraint { * }
     rule table-constraint:sym<PRIMARY-KEY> { 'PRIMARY' 'KEY' '(' [ <identifier> + % ',' ] ')' }
+
+    rule sql-statement:sym<ALTER-TABLE> {
+        'ALTER' 'TABLE'
+        <entity-name>
+        <alter-table-action>
+        ';'
+    }
+
+    proto rule alter-table-action { * }
+    rule alter-table-action:sym<ADD-CONSTRAINT> {
+        'ADD' 'CONSTRAINT'
+        <identifier>
+        <table-constraint>
+    }
 }
 
