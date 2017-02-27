@@ -4,7 +4,7 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
-plan 2;
+plan 3;
 
 my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new);
 ok $xlate, 'created translator';
@@ -31,5 +31,26 @@ subtest 'primary key' => {
             ENABLE NOVALIDATE;
         ORACLE
         "ALTER TABLE foo.pk ADD CONSTRAINT pk_constr_name PRIMARY KEY ( id1, id2 ) NOT DEFERRABLE INITIALLY IMMEDIATE;\n",
+        '2-column pk with deferrable options';
+}
+
+subtest 'UNIQUE' => {
+    plan 2;
+
+    is $xlate.parse("ALTER TABLE foo.uk ADD CONSTRAINT uk_constr_name UNIQUE ( id );"),
+        "ALTER TABLE foo.uk ADD CONSTRAINT uk_constr_name UNIQUE ( id );\n",
+        'basic 1-col unique';
+
+    is $xlate.parse(q :to<ORACLE>),
+        ALTER TABLE foo.pk ADD CONSTRAINT pk_constr_name UNIQUE
+            (
+                id1
+                , id2
+            )
+            NOT DEFERRABLE
+            INITIALLY IMMEDIATE
+            ENABLE NOVALIDATE;
+        ORACLE
+        "ALTER TABLE foo.pk ADD CONSTRAINT pk_constr_name UNIQUE ( id1, id2 ) NOT DEFERRABLE INITIALLY IMMEDIATE;\n",
         '2-column pk with deferrable options';
 }

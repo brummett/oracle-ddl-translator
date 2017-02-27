@@ -116,6 +116,7 @@ class TranslateOracleDDL::ToPostgres {
     }
 
     method table-constraint:sym<PRIMARY-KEY> ($/) { make "PRIMARY KEY ( { $<identifier>.join(', ') } )" }
+    method table-constraint:sym<UNIQUE> ($/)      { make "UNIQUE ( { $<identifier>.join(', ') } )" }
 
     method constraint-deferrables:sym<DEFERRABLE> ($/) { make $/ }
     method constraint-deferrables:sym<INITIALLY> ($/)  { make $/ }
