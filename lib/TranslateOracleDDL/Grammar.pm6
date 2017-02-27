@@ -24,6 +24,13 @@ grammar TranslateOracleDDL::Grammar {
     }
 
     token identifier { \w+ }
+    token qq-identifier {
+        '"'
+        [ <-["]>+:
+            | '""'
+        ]*
+        '"'
+    }
     token bigint { \d+ }
     token integer { \d+ }
     token entity-name {
@@ -40,6 +47,9 @@ grammar TranslateOracleDDL::Grammar {
         "'"
     }
     token value:sym<systimestamp-function> { 'systimestamp' }
+
+    proto token expr { * }
+    token expr:sym<COLUMN-IS-NOT-NULL>  { <qq-identifier> <ws> 'IS' <ws> 'NOT' <ws> 'NULL' }
 
     proto token entity-type { * }
     token entity-type:sym<TABLE> { <sym> }
@@ -111,6 +121,7 @@ grammar TranslateOracleDDL::Grammar {
     proto rule table-constraint { * }
     rule table-constraint:sym<PRIMARY-KEY> { 'PRIMARY' 'KEY' '(' [ <identifier> + % ',' ] ')' }
     rule table-constraint:sym<UNIQUE>      { 'UNIQUE' '(' [ <identifier> + % ',' ] ')' }
+    rule table-constraint:sym<CHECK>       { 'CHECK' '(' <expr> ')' }
 
     proto token constraint-deferrables { * }
     token constraint-deferrables:sym<DEFERRABLE> { ['NOT' <ws>]? 'DEFERRABLE' }

@@ -4,7 +4,7 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
-plan 3;
+plan 4;
 
 my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new);
 ok $xlate, 'created translator';
@@ -53,4 +53,12 @@ subtest 'UNIQUE' => {
         ORACLE
         "ALTER TABLE foo.pk ADD CONSTRAINT pk_constr_name UNIQUE ( id1, id2 ) DEFERRABLE INITIALLY DEFERRED;\n",
         '2-column pk with deferrable options';
+}
+
+subtest 'CHECK' => {
+    plan 1;
+
+    is $xlate.parse('ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ("col_name" IS NOT NULL);'),
+        qq{ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ( "col_name" IS NOT NULL );\n},
+        '"column" is not null';
 }

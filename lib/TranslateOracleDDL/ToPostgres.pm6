@@ -54,6 +54,8 @@ class TranslateOracleDDL::ToPostgres {
     method value:sym<string-value> ($/)             { make "$/" }
     method value:sym<systimestamp-function> ($/)    { make 'LOCALTIMESTAMP' }
 
+    method expr:sym<COLUMN-IS-NOT-NULL> ($/)        { make "$/" }
+
     method sql-statement:sym<COMMENT-ON> ($/) {
         make "COMMENT ON $<entity-type> $<entity-name> IS { $<value>.made }"
     }
@@ -117,6 +119,7 @@ class TranslateOracleDDL::ToPostgres {
 
     method table-constraint:sym<PRIMARY-KEY> ($/) { make "PRIMARY KEY ( { $<identifier>.join(', ') } )" }
     method table-constraint:sym<UNIQUE> ($/)      { make "UNIQUE ( { $<identifier>.join(', ') } )" }
+    method table-constraint:sym<CHECK> ($/)       { make "CHECK ( { $<expr>.made } )" }
 
     method constraint-deferrables:sym<DEFERRABLE> ($/) { make $/ }
     method constraint-deferrables:sym<INITIALLY> ($/)  { make $/ }
