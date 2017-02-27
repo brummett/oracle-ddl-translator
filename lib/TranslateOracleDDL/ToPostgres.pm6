@@ -55,6 +55,7 @@ class TranslateOracleDDL::ToPostgres {
     method value:sym<systimestamp-function> ($/)    { make 'LOCALTIMESTAMP' }
 
     method expr:sym<COLUMN-IS-NOT-NULL> ($/)        { make "$/" }
+    method expr:sym<equals>             ($/)        { make "@<identifier-or-value>[0] = @<identifier-or-value>[1]" }
 
     method sql-statement:sym<COMMENT-ON> ($/) {
         make "COMMENT ON $<entity-type> $<entity-name> IS { $<value>.made }"

@@ -49,7 +49,10 @@ grammar TranslateOracleDDL::Grammar {
     }
     token value:sym<systimestamp-function> { 'systimestamp' }
 
+    token identifier-or-value           { <identifier> | <value> }
+
     proto token expr { * }
+    rule expr:sym<equals>               { <identifier-or-value> '=' <identifier-or-value> }
     token expr:sym<COLUMN-IS-NOT-NULL>  { <identifier> <ws> 'IS' <ws> 'NOT' <ws> 'NULL' }
 
     proto token entity-type { * }
