@@ -119,10 +119,9 @@ grammar TranslateOracleDDL::Grammar {
     }
 
     proto rule alter-table-action { * }
-    rule alter-table-action:sym<ADD-CONSTRAINT> {
-        'ADD' 'CONSTRAINT'
-        <identifier>
-        <table-constraint>
-    }
+    rule alter-table-action:sym<ADD> { 'ADD' <alter-table-action-add> }
+
+    proto rule alter-table-action-add { * }
+    rule alter-table-action-add:sym<CONSTRAINT> { <table-constraint-def> }
 }
 

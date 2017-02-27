@@ -111,7 +111,9 @@ class TranslateOracleDDL::ToPostgres {
     method table-constraint:sym<PRIMARY-KEY> ($/) { make "PRIMARY KEY ( { $<identifier>.join(', ') } )" }
 
     method sql-statement:sym<ALTER-TABLE> ($/) {
-        make "ALTER TABLE $<entity-name> $<alter-table-action>"
+        make "ALTER TABLE $<entity-name> " ~ $<alter-table-action>.made;
     }
+    method alter-table-action:sym<ADD> ($/)             { make 'ADD ' ~ $<alter-table-action-add>.made }
+    method alter-table-action-add:sym<CONSTRAINT> ($/)  { make $<table-constraint-def>.made }
 }
 
