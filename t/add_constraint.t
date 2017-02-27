@@ -47,10 +47,10 @@ subtest 'UNIQUE' => {
                 id1
                 , id2
             )
-            NOT DEFERRABLE
-            INITIALLY IMMEDIATE
+            DEFERRABLE
+            INITIALLY DEFERRED
             ENABLE NOVALIDATE;
         ORACLE
-        "ALTER TABLE foo.pk ADD CONSTRAINT pk_constr_name UNIQUE ( id1, id2 ) NOT DEFERRABLE INITIALLY IMMEDIATE;\n",
+        "ALTER TABLE foo.pk ADD CONSTRAINT pk_constr_name UNIQUE ( id1, id2 ) DEFERRABLE INITIALLY DEFERRED;\n",
         '2-column pk with deferrable options';
 }

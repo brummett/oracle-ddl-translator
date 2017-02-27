@@ -114,7 +114,7 @@ grammar TranslateOracleDDL::Grammar {
 
     proto token constraint-deferrables { * }
     token constraint-deferrables:sym<DEFERRABLE> { ['NOT' <ws>]? 'DEFERRABLE' }
-    token constraint-deferrables:sym<INITIALLY>  { 'INITIALLY' <ws> 'IMMEDIATE'|'DEFERRED' }
+    token constraint-deferrables:sym<INITIALLY>  { 'INITIALLY' <ws> ['IMMEDIATE'|'DEFERRED'] }
     token constraint-deferrables:sym<ENABLE-NOVALIDATE> { 'ENABLE' <ws> 'NOVALIDATE' }    # Postgres doesn't handle this
 
     rule sql-statement:sym<ALTER-TABLE> {
