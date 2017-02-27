@@ -23,8 +23,9 @@ grammar TranslateOracleDDL::Grammar {
         \v+
     }
 
-    token identifier { \w+ }
-    token qq-identifier {
+    proto token identifier { * }
+    token identifier:sym<bareword> { \w+ }
+    token identifier:sym<qq> {
         '"'
         [ <-["]>+:
             | '""'
@@ -49,7 +50,7 @@ grammar TranslateOracleDDL::Grammar {
     token value:sym<systimestamp-function> { 'systimestamp' }
 
     proto token expr { * }
-    token expr:sym<COLUMN-IS-NOT-NULL>  { <qq-identifier> <ws> 'IS' <ws> 'NOT' <ws> 'NULL' }
+    token expr:sym<COLUMN-IS-NOT-NULL>  { <identifier> <ws> 'IS' <ws> 'NOT' <ws> 'NULL' }
 
     proto token entity-type { * }
     token entity-type:sym<TABLE> { <sym> }
