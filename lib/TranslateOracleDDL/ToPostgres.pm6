@@ -114,15 +114,9 @@ class TranslateOracleDDL::ToPostgres {
     method sql-statement:sym<SELECT> ($/) {
         make "SELECT $<select-column-list>FROM $<rest-of-select>"
     }        
-    #rule sql-statement:sym<SELECT> {
-    #    'SELECT'
-    #    <select-column-list>
-    #    ['FROM'|'from'] <rest-of-select>
-    #}
 
-    
-    #method select-column-def:sym<COLUMN-NAME>        ($/) { make $<identifier> }
-    #method select-column-def:sym<QUOTED-COLUMN-NAME> ($/) { make $<identifier> }
-
+    method sql-statement:sym<VIEW> ($/) {
+        make "CREATE OR REPLACE VIEW $<view-table-def>"~"( $<select-column-list>) AS $<sql-statement>"
+    }
 }
 
