@@ -56,7 +56,14 @@ class TranslateOracleDDL::ToPostgres {
 
     method expr:sym<simple>              ($/)       { make $<expr-comparison>.made }
     method expr:sym<and-or>              ($/)       { make "{ @<expr-comparison>[0].made } $<and-or-keyword> { @<expr-comparison>[1].made }" }
-    method expr:sym<recurse-and-or>      ($/)       { make "( { @<expr>[0].made } ) $<and-or-keyword> ( { @<expr>[1].made } )" }
+    method expr:sym<recurse-and-or>      ($/)       {
+        my Str $str = "( { @<expr>.shift.made } )";
+        for @<and-or-keyword> Z @<expr> -> ( $and-or, $expr ) {
+            $str ~= " $and-or ( { $expr.made } )";
+        }
+        make $str;
+    }
+
     method expr-comparison:sym<operator> ($/)       { make "@<identifier-or-value>[0] $<comparison-operator> @<identifier-or-value>[1]" }
     method expr-comparison:sym<NULL>     ($/)       { make "$<identifier> $<null-test-operator>" }
 

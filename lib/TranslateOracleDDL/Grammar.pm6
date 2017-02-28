@@ -53,7 +53,7 @@ grammar TranslateOracleDDL::Grammar {
 
     token and-or-keyword                { 'and' | 'or' }
     proto rule expr { * }
-    rule expr:sym<recurse-and-or>       { '(' <expr> ')' <and-or-keyword> '(' <expr> ')' }
+    rule expr:sym<recurse-and-or>       { [ '(' <expr> ')' ]**2..* % <and-or-keyword> }
     rule expr:sym<and-or>               { <expr-comparison> <and-or-keyword> <expr-comparison> }
     rule expr:sym<simple>               { <expr-comparison> }
     token comparison-operator           { '=' }
