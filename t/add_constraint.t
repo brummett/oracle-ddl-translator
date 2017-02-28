@@ -56,11 +56,15 @@ subtest 'UNIQUE' => {
 }
 
 subtest 'CHECK' => {
-    plan 4;
+    plan 5;
 
     is $xlate.parse('ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ("col_name" IS NOT NULL);'),
         qq{ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ( "col_name" IS NOT NULL );\n},
         '"column" is not null';
+
+    is $xlate.parse('ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ("col_name" is null);'),
+        qq{ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ( "col_name" is null );\n},
+        '"column" is null (lower case)';
 
     is $xlate.parse('ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK (col_name=1);'),
         "ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ( col_name = 1 );\n",

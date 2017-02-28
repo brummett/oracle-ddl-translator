@@ -58,7 +58,7 @@ grammar TranslateOracleDDL::Grammar {
     token comparison-operator           { '=' }
     proto rule expr-comparison          { * }
     rule expr-comparison:sym<operator>  { <identifier-or-value> <comparison-operator> <identifier-or-value> }
-    rule expr-comparison:sym<NULL>      { <identifier> $<null-test-operator>=('IS' ['NOT']? 'NULL') }
+    rule expr-comparison:sym<NULL>      { :ignorecase <identifier> $<null-test-operator>=('IS' ['NOT']? 'NULL') }
 
     proto token entity-type { * }
     token entity-type:sym<TABLE> { <sym> }
