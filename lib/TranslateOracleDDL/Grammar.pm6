@@ -60,6 +60,7 @@ grammar TranslateOracleDDL::Grammar {
     proto rule expr-comparison          { * }
     rule expr-comparison:sym<operator>  { <identifier-or-value> <comparison-operator> <identifier-or-value> }
     rule expr-comparison:sym<NULL>      { :ignorecase <identifier> $<null-test-operator>=('IS' ['NOT']? 'NULL') }
+    rule expr-comparison:sym<IN>        { :ignorecase <identifier> 'IN' '(' [ <value> + % ',' ] ')' }
 
     proto token entity-type { * }
     token entity-type:sym<TABLE> { <sym> }
@@ -132,6 +133,12 @@ grammar TranslateOracleDDL::Grammar {
     rule table-constraint:sym<PRIMARY-KEY> { 'PRIMARY' 'KEY' '(' [ <identifier> + % ',' ] ')' }
     rule table-constraint:sym<UNIQUE>      { 'UNIQUE' '(' [ <identifier> + % ',' ] ')' }
     rule table-constraint:sym<CHECK>       { 'CHECK' '(' <expr> ')' }
+    rule table-constraint:sym<FOREIGN-KEY> {
+        'FOREIGN' 'KEY'
+        '(' [ <table-columns=identifier> + % ',' ] ')'
+        REFERENCES <entity-name>
+        '(' [ <fk-columns=identifier> + % ',' ] ')'
+    }
 
     proto token constraint-deferrables { * }
     token constraint-deferrables:sym<DEFERRABLE> { ['NOT' <ws>]? 'DEFERRABLE' }

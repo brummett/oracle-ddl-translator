@@ -66,6 +66,7 @@ class TranslateOracleDDL::ToPostgres {
 
     method expr-comparison:sym<operator> ($/)       { make "@<identifier-or-value>[0] $<comparison-operator> @<identifier-or-value>[1]" }
     method expr-comparison:sym<NULL>     ($/)       { make "$<identifier> $<null-test-operator>" }
+    method expr-comparison:sym<IN>       ($/)       { make "$<identifier> IN ( { @<value>>>.made.join(', ') } )" }
 
     method sql-statement:sym<COMMENT-ON> ($/) {
         make "COMMENT ON $<entity-type> $<entity-name> IS { $<value>.made }"
@@ -131,6 +132,9 @@ class TranslateOracleDDL::ToPostgres {
     method table-constraint:sym<PRIMARY-KEY> ($/) { make "PRIMARY KEY ( { $<identifier>.join(', ') } )" }
     method table-constraint:sym<UNIQUE> ($/)      { make "UNIQUE ( { $<identifier>.join(', ') } )" }
     method table-constraint:sym<CHECK> ($/)       { make "CHECK ( { $<expr>.made } )" }
+    method table-constraint:sym<FOREIGN-KEY> ($/) {
+        make "FOREIGN KEY ( { @<table-columns>.join(', ') } ) REFERENCES $<entity-name> ( { @<fk-columns>.join(', ') } )";
+    }
 
     method constraint-deferrables:sym<DEFERRABLE> ($/) { make $/ }
     method constraint-deferrables:sym<INITIALLY> ($/)  { make $/ }

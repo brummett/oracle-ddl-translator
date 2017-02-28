@@ -4,7 +4,7 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
-plan 4;
+plan 5;
 
 my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new);
 ok $xlate, 'created translator';
@@ -56,7 +56,7 @@ subtest 'UNIQUE' => {
 }
 
 subtest 'CHECK' => {
-    plan 8;
+    plan 9;
 
     is $xlate.parse('ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ("col_name" IS NOT NULL);'),
         qq{ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ( "col_name" IS NOT NULL );\n},
@@ -69,6 +69,10 @@ subtest 'CHECK' => {
     is $xlate.parse('ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK (col_name=1);'),
         "ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ( col_name = 1 );\n",
         'column value = 1';
+
+    is $xlate.parse('ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK (col_name in (0,1));'),
+        "ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ( col_name IN ( 0, 1 ) );\n",
+        'column IN list';
 
     is $xlate.parse('ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK (col_name=1 and col2=3);'),
         "ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ( col_name = 1 and col2 = 3 );\n",
@@ -89,4 +93,16 @@ subtest 'CHECK' => {
     is $xlate.parse('ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ((col1=1 and col2=2) or (col3=3 and col4=4) or (col5=5 and col6=6));'),
         "ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ( ( col1 = 1 and col2 = 2 ) or ( col3 = 3 and col4 = 4 ) or ( col5 = 5 and col6 = 6 ) );\n",
         'OR 2 ANDed exprs';
+}
+
+subtest 'FOREIGN KEY' => {
+    plan 2;
+
+    is $xlate.parse('ALTER TABLE foo.fk ADD CONSTRAINT fk_constr FOREIGN KEY ( col ) REFERENCES other.table ( other_col );'),
+        "ALTER TABLE foo.fk ADD CONSTRAINT fk_constr FOREIGN KEY ( col ) REFERENCES other.table ( other_col );\n",
+        'FK with one column';
+
+    is $xlate.parse('ALTER TABLE foo.fk ADD CONSTRAINT fk_constr FOREIGN KEY ( col1, col2 ) REFERENCES other.table ( other1, other2 );'),
+        "ALTER TABLE foo.fk ADD CONSTRAINT fk_constr FOREIGN KEY ( col1, col2 ) REFERENCES other.table ( other1, other2 );\n",
+        'FK with one column';
 }
