@@ -56,7 +56,7 @@ subtest 'UNIQUE' => {
 }
 
 subtest 'CHECK' => {
-    plan 2;
+    plan 4;
 
     is $xlate.parse('ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ("col_name" IS NOT NULL);'),
         qq{ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ( "col_name" IS NOT NULL );\n},
@@ -65,4 +65,12 @@ subtest 'CHECK' => {
     is $xlate.parse('ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK (col_name=1);'),
         "ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ( col_name = 1 );\n",
         'column value = 1';
+
+    is $xlate.parse('ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK (col_name=1 and col2=3);'),
+        "ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ( col_name = 1 and col2 = 3 );\n",
+        'AND 2 simple expressions';
+
+    is $xlate.parse('ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK (col_name=1 or col2=3);'),
+        "ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ( col_name = 1 or col2 = 3 );\n",
+        'OR 2 simple expressions';
 }

@@ -51,9 +51,14 @@ grammar TranslateOracleDDL::Grammar {
 
     token identifier-or-value           { <identifier> | <value> }
 
-    proto token expr { * }
-    rule expr:sym<equals>               { <identifier-or-value> '=' <identifier-or-value> }
-    token expr:sym<COLUMN-IS-NOT-NULL>  { <identifier> <ws> 'IS' <ws> 'NOT' <ws> 'NULL' }
+    token and-or-keyword                { 'and' | 'or' }
+    proto rule expr { * }
+    rule expr:sym<and-or>               { <expr-comparison> <and-or-keyword> <expr-comparison> }
+    rule expr:sym<simple>               { <expr-comparison> }
+    token comparison-operator           { '=' }
+    proto rule expr-comparison          { * }
+    rule expr-comparison:sym<operator>  { <identifier-or-value> <comparison-operator> <identifier-or-value> }
+    rule expr-comparison:sym<NULL>      { <identifier> $<null-test-operator>=('IS' ['NOT']? 'NULL') }
 
     proto token entity-type { * }
     token entity-type:sym<TABLE> { <sym> }

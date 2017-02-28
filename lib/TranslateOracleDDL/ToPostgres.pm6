@@ -54,8 +54,10 @@ class TranslateOracleDDL::ToPostgres {
     method value:sym<string-value> ($/)             { make "$/" }
     method value:sym<systimestamp-function> ($/)    { make 'LOCALTIMESTAMP' }
 
-    method expr:sym<COLUMN-IS-NOT-NULL> ($/)        { make "$/" }
-    method expr:sym<equals>             ($/)        { make "@<identifier-or-value>[0] = @<identifier-or-value>[1]" }
+    method expr:sym<simple>              ($/)       { make $<expr-comparison>.made }
+    method expr:sym<and-or>              ($/)       { make "{ @<expr-comparison>[0].made } $<and-or-keyword> { @<expr-comparison>[1].made }" }
+    method expr-comparison:sym<operator> ($/)       { make "@<identifier-or-value>[0] $<comparison-operator> @<identifier-or-value>[1]" }
+    method expr-comparison:sym<NULL>     ($/)       { make "$<identifier> $<null-test-operator>" }
 
     method sql-statement:sym<COMMENT-ON> ($/) {
         make "COMMENT ON $<entity-type> $<entity-name> IS { $<value>.made }"
