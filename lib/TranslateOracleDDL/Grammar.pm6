@@ -51,7 +51,7 @@ grammar TranslateOracleDDL::Grammar {
 
     token identifier-or-value           { <identifier> | <value> }
 
-    token and-or-keyword                { 'and' | 'or' }
+    token and-or-keyword                { :ignorecase 'and' | 'or' }
     proto rule expr { * }
     rule expr:sym<recurse-and-or>       { [ '(' <expr> ')' ]**2..* % <and-or-keyword> }
     rule expr:sym<and-or>               { <expr-comparison> <and-or-keyword> <expr-comparison> }

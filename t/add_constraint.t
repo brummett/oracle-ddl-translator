@@ -90,8 +90,8 @@ subtest 'CHECK' => {
         "ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ( ( col1 = 1 or col2 = 2 ) and ( col3 = 3 or col4 = 4 ) );\n",
         'AND 2 ORed exprs';
 
-    is $xlate.parse('ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ((col1=1 and col2=2) or (col3=3 and col4=4) or (col5=5 and col6=6));'),
-        "ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ( ( col1 = 1 and col2 = 2 ) or ( col3 = 3 and col4 = 4 ) or ( col5 = 5 and col6 = 6 ) );\n",
+    is $xlate.parse('ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ((col1=1 AND col2=2) OR (col3=3 and col4=4) or (col5=5 and col6=6));'),
+        "ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ( ( col1 = 1 AND col2 = 2 ) OR ( col3 = 3 and col4 = 4 ) or ( col5 = 5 and col6 = 6 ) );\n",
         'OR 2 ANDed exprs';
 }
 
