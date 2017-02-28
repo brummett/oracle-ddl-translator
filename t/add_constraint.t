@@ -10,11 +10,15 @@ my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.
 ok $xlate, 'created translator';
 
 subtest 'primary key' => {
-    plan 3;
+    plan 4;
 
     is $xlate.parse("ALTER TABLE foo.pk ADD CONSTRAINT pk_constr_name PRIMARY KEY ( id );"),
         "ALTER TABLE foo.pk ADD CONSTRAINT pk_constr_name PRIMARY KEY ( id );\n",
         'basic 1-column pk';
+
+    is $xlate.parse('ALTER TABLE foo.pk ADD CONSTRAINT pk$constr_name PRIMARY KEY ( id );'),
+        "ALTER TABLE foo.pk ADD CONSTRAINT pk\$constr_name PRIMARY KEY ( id );\n",
+        '1-column pk where the name has a dollar sign';
 
     is $xlate.parse("ALTER TABLE foo.pk ADD CONSTRAINT pk_constr_name PRIMARY KEY ( id1, id2 );"),
         "ALTER TABLE foo.pk ADD CONSTRAINT pk_constr_name PRIMARY KEY ( id1, id2 );\n",

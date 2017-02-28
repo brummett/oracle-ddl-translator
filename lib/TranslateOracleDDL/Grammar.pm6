@@ -24,7 +24,7 @@ grammar TranslateOracleDDL::Grammar {
     }
 
     proto token identifier { * }
-    token identifier:sym<bareword> { \w+ }
+    token identifier:sym<bareword> { <[$\w]>+ }
     token identifier:sym<qq> {
         '"'
         [ <-["]>+:
