@@ -2,7 +2,9 @@ use v6;
 
 class TranslateOracleDDL::ToPostgres {
     method TOP($/) {
-        make $<sql-statement>>>.made.grep({ $_ }).join(";\n") ~ ";\n";
+        my Str $string = $<sql-statement>>>.made.grep({ $_ }).join(";\n");
+        $string ~= ";\n" if $string.chars;
+        make $string;
     }
 
     method sql-statement:sym<REM> ($/) {
@@ -53,6 +55,21 @@ class TranslateOracleDDL::ToPostgres {
     method value:sym<number-value> ($/)             { make "$/" }
     method value:sym<string-value> ($/)             { make "$/" }
     method value:sym<systimestamp-function> ($/)    { make 'LOCALTIMESTAMP' }
+
+    method expr:sym<simple>              ($/)       { make $<expr-comparison>.made }
+    method expr:sym<and-or>              ($/)       { make "{ @<expr-comparison>[0].made } $<and-or-keyword> { @<expr-comparison>[1].made }" }
+    method expr:sym<recurse-and-or>      ($/)       {
+        my Str $str = "( { @<expr>.shift.made } )";
+        for @<and-or-keyword> Z @<expr> -> ( $and-or, $expr ) {
+            $str ~= " $and-or ( { $expr.made } )";
+        }
+        make $str;
+    }
+
+    method expr-comparison:sym<operator> ($/)       { make "@<identifier-or-value>[0] $<comparison-operator> @<identifier-or-value>[1]" }
+    method expr-comparison:sym<NULL>     ($/)       { make "$<identifier> $<null-test-operator>" }
+    method expr-comparison:sym<IN>       ($/)       { make "$<identifier> IN ( { @<value>>>.made.join(', ') } )" }
+    method expr-comparison:sym<NOT>      ($/)       { make "NOT( { $<expr>.made } )" }
 
     method sql-statement:sym<COMMENT-ON> ($/) {
         make "COMMENT ON $<entity-type> $<entity-name> IS { $<value>.made }"
@@ -107,7 +124,30 @@ class TranslateOracleDDL::ToPostgres {
     method create-table-column-constraint:sym<PRIMARY-KEY> ($/) { make 'PRIMARY KEY' }
     method create-table-column-constraint:sym<DEFAULT> ($/) { make "DEFAULT { $<value>.made }" }
 
-    method table-constraint-def ($/)        { make "CONSTRAINT $<identifier> { $<table-constraint>.made }" }
+    method table-constraint-def ($/)        {
+        my @parts = ('CONSTRAINT', $<identifier>, $<table-constraint>.made);
+        if @<constraint-deferrables>.elems {
+            @parts.push: @<constraint-deferrables>>>.made.grep({ $_ });
+        }
+        make @parts.join(' ');
+    }
+
     method table-constraint:sym<PRIMARY-KEY> ($/) { make "PRIMARY KEY ( { $<identifier>.join(', ') } )" }
+    method table-constraint:sym<UNIQUE> ($/)      { make "UNIQUE ( { $<identifier>.join(', ') } )" }
+    method table-constraint:sym<CHECK> ($/)       { make "CHECK ( { $<expr>.made } )" }
+    method table-constraint:sym<FOREIGN-KEY> ($/) {
+        make "FOREIGN KEY ( { @<table-columns>.join(', ') } ) REFERENCES $<entity-name> ( { @<fk-columns>.join(', ') } )";
+    }
+
+    method constraint-deferrables:sym<DEFERRABLE> ($/) { make $/ }
+    method constraint-deferrables:sym<INITIALLY> ($/)  { make $/ }
+
+    method sql-statement:sym<ALTER-TABLE> ($/) {
+        make "ALTER TABLE $<entity-name> " ~ $<alter-table-action>.made;
+    }
+    method sql-statement:sym<ALTER-TABLE-ADD-CONSTRAINT-DISABLE> ($/) { make Str }
+
+    method alter-table-action:sym<ADD> ($/)             { make 'ADD ' ~ $<alter-table-action-add>.made }
+    method alter-table-action-add:sym<CONSTRAINT> ($/)  { make $<table-constraint-def>.made }
 }
 
