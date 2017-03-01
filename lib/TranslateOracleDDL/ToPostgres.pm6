@@ -2,7 +2,9 @@ use v6;
 
 class TranslateOracleDDL::ToPostgres {
     method TOP($/) {
-        make $<sql-statement>>>.made.grep({ $_ }).join(";\n") ~ ";\n";
+        my Str $string = $<sql-statement>>>.made.grep({ $_ }).join(";\n");
+        $string ~= ";\n" if $string.chars;
+        make $string;
     }
 
     method sql-statement:sym<REM> ($/) {
@@ -143,6 +145,8 @@ class TranslateOracleDDL::ToPostgres {
     method sql-statement:sym<ALTER-TABLE> ($/) {
         make "ALTER TABLE $<entity-name> " ~ $<alter-table-action>.made;
     }
+    method sql-statement:sym<ALTER-TABLE-ADD-CONSTRAINT-DISABLE> ($/) { make Any }
+
     method alter-table-action:sym<ADD> ($/)             { make 'ADD ' ~ $<alter-table-action-add>.made }
     method alter-table-action-add:sym<CONSTRAINT> ($/)  { make $<table-constraint-def>.made }
 }

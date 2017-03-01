@@ -4,7 +4,7 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
-plan 5;
+plan 6;
 
 my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new);
 ok $xlate, 'created translator';
@@ -113,4 +113,12 @@ subtest 'FOREIGN KEY' => {
     is $xlate.parse('ALTER TABLE foo.fk ADD CONSTRAINT fk_constr FOREIGN KEY ( col1, col2 ) REFERENCES other.table ( other1, other2 );'),
         "ALTER TABLE foo.fk ADD CONSTRAINT fk_constr FOREIGN KEY ( col1, col2 ) REFERENCES other.table ( other1, other2 );\n",
         'FK with one column';
+}
+
+subtest 'DISABLEd' => {
+    plan 1;
+
+    is $xlate.parse('ALTER TABLE foo.ck ADD CONSTRAINT ck_constr CHECK (col_name = 1) NOT DEFERRABLE INITIALLY IMMEDIATE DISABLE;'),
+        '',
+        'DISABLEd constraints disappear';
 }

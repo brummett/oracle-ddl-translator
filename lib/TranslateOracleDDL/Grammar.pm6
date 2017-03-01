@@ -152,6 +152,13 @@ grammar TranslateOracleDDL::Grammar {
         <alter-table-action>
         ';'
     }
+    rule sql-statement:sym<ALTER-TABLE-ADD-CONSTRAINT-DISABLE> {
+        'ALTER' 'TABLE'
+        <entity-name>
+        'ADD' <table-constraint-def>
+        'DISABLE'
+        ';'
+    }
 
     proto rule alter-table-action { * }
     rule alter-table-action:sym<ADD> { 'ADD' <alter-table-action-add> }
