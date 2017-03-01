@@ -1,7 +1,7 @@
 use v6;
 
 grammar TranslateOracleDDL::Grammar {
-    token TOP {
+    rule TOP {
         <sql-statement>+
     }
 
@@ -154,9 +154,11 @@ grammar TranslateOracleDDL::Grammar {
     }
     rule sql-statement:sym<ALTER-TABLE-ADD-CONSTRAINT-DISABLE> {
         'ALTER' 'TABLE'
-        <entity-name>
-        'ADD' <table-constraint-def>
+        \S+
+        'ADD' 'CONSTRAINT'
+        .*?
         'DISABLE'
+        .*?
         ';'
     }
 

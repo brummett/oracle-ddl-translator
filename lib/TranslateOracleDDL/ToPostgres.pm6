@@ -145,7 +145,7 @@ class TranslateOracleDDL::ToPostgres {
     method sql-statement:sym<ALTER-TABLE> ($/) {
         make "ALTER TABLE $<entity-name> " ~ $<alter-table-action>.made;
     }
-    method sql-statement:sym<ALTER-TABLE-ADD-CONSTRAINT-DISABLE> ($/) { make Any }
+    method sql-statement:sym<ALTER-TABLE-ADD-CONSTRAINT-DISABLE> ($/) { make Str }
 
     method alter-table-action:sym<ADD> ($/)             { make 'ADD ' ~ $<alter-table-action-add>.made }
     method alter-table-action-add:sym<CONSTRAINT> ($/)  { make $<table-constraint-def>.made }
