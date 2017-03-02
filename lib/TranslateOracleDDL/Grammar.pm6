@@ -188,5 +188,13 @@ grammar TranslateOracleDDL::Grammar {
     }
     proto rule index-option { * }
     rule index-option:sym<COMPRESS> { 'COMPRESS' \d+ }
+    rule index-option:sym<GLOBAL-PARTITION> {
+        'GLOBAL' 'PARTITION' 'BY' 'RANGE'
+        '(' <identifier>+ % ',' ')'
+        '(' <partition-clause>+ % ',' ')'
+    }
+
+    rule partition-clause { 'PARTITION' <identifier> VALUES LESS THAN '(' <expr> ')' }
+
 }
 

@@ -174,6 +174,7 @@ class TranslateOracleDDL::ToPostgres {
 
 
     method index-option:sym<COMPRESS> ($/) { make Str }
+    method index-option:sym<GLOBAL-PARTITION> ($/) { make Str }
     method sql-statement:sym<CREATE-INDEX> ($/) {
         my Str @parts = <CREATE>;
         @parts.push('UNIQUE') if $<unique>;

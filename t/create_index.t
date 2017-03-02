@@ -28,11 +28,38 @@ subtest 'basic' => {
 }
 
 subtest 'index options' => {
-    plan 1;
+    plan 2;
 
     is $xlate.parse('CREATE INDEX foo.i ON foo.table ( col1 ) COMPRESS 1;'),
         "CREATE INDEX foo.i ON foo.table ( col1 );\n",
         'COMPRESS option is dropped';
+
+    is $xlate.parse(q :to<ORACLE> ),
+        CREATE INDEX foo.part ON foo.table
+            (
+                col
+            )
+            GLOBAL PARTITION BY RANGE
+            (
+                col
+            )
+            (
+                PARTITION part1 VALUES LESS THAN
+                    (
+                        '1'
+                    )
+                , PARTITION part2 VALUES LESS THAN
+                    (
+                        '2'
+                    )
+                , PARTITION part3 VALUES LESS THAN
+                    (
+                        '3'
+                    )
+            );
+        ORACLE
+        "CREATE INDEX foo.part ON foo.table ( col );\n",
+        'GLOBAL PARTITION BY RANGE is dropped';
 }
 
 subtest 'functional index' => {
