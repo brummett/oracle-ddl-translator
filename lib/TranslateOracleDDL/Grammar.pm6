@@ -70,6 +70,8 @@ grammar TranslateOracleDDL::Grammar {
     rule expr-comparison:sym<decode-f>  { :ignorecase 'decode' '(' <topic=expr> ',' [ [ <case=value> ',' <result=expr> ]+? % ',' ] ',' <default=expr> ')' }
     rule expr-comparison:sym<trunc-f>   { :ignorecase 'trunc' '(' <expr> ')' }
     rule expr-comparison:sym<to_char-f> { :ignorecase 'to_char' '(' <expr> ')' }
+    rule expr-comparison:sym<upper-f>   { :ignorecase 'upper' '(' <expr> ')' }
+    rule expr-comparison:sym<lower-f>   { :ignorecase 'lower' '(' <expr> ')' }
 
     proto token entity-type { * }
     token entity-type:sym<TABLE> { <sym> }
