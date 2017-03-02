@@ -56,12 +56,22 @@ grammar TranslateOracleDDL::Grammar {
     rule expr:sym<recurse-and-or>       { [ '(' <expr> ')' ]**2..* % <and-or-keyword> }
     rule expr:sym<and-or>               { <expr-comparison> <and-or-keyword> <expr-comparison> }
     rule expr:sym<simple>               { <expr-comparison> }
+    rule expr:sym<atom>                 { <identifier-or-value> }
     token comparison-operator           { '=' }
     proto rule expr-comparison          { * }
     rule expr-comparison:sym<operator>  { <identifier-or-value> <comparison-operator> <identifier-or-value> }
     rule expr-comparison:sym<NULL>      { :ignorecase <identifier> $<null-test-operator>=('IS' ['NOT']? 'NULL') }
     rule expr-comparison:sym<IN>        { :ignorecase <identifier> 'IN' '(' [ <value> + % ',' ] ')' }
-    rule expr-comparison:sym<NOT>       { :ignorecase 'NOT' '(' <expr> ')' }
+        rule case-when-clause           { :ignorecase 'WHEN' <case=expr> 'THEN' <then=expr> }
+        rule else-clause                { :ignorecase 'ELSE' <expr> }
+    rule expr-comparison:sym<CASE>      { :ignorecase 'CASE' <when-clause=case-when-clause>* <else-clause>? 'END' }
+    rule expr-comparison:sym<not-f>     { :ignorecase 'NOT' '(' <expr> ')' }
+    rule expr-comparison:sym<substr-f>  { :ignorecase 'substr' '(' <expr>**2..3 % ',' ')' }
+    rule expr-comparison:sym<decode-f>  { :ignorecase 'decode' '(' <topic=expr> ',' [ [ <case=value> ',' <result=expr> ]+? % ',' ] ',' <default=expr> ')' }
+    rule expr-comparison:sym<trunc-f>   { :ignorecase 'trunc' '(' <expr> ')' }
+    rule expr-comparison:sym<to_char-f> { :ignorecase 'to_char' '(' <expr> ')' }
+    rule expr-comparison:sym<upper-f>   { :ignorecase 'upper' '(' <expr> ')' }
+    rule expr-comparison:sym<lower-f>   { :ignorecase 'lower' '(' <expr> ')' }
 
     proto token entity-type { * }
     token entity-type:sym<TABLE> { <sym> }
@@ -167,5 +177,26 @@ grammar TranslateOracleDDL::Grammar {
 
     proto rule alter-table-action-add { * }
     rule alter-table-action-add:sym<CONSTRAINT> { <table-constraint-def> }
+
+    token unique-keyword { 'UNIQUE' }
+    rule sql-statement:sym<CREATE-INDEX> {
+        'CREATE' <unique=unique-keyword>? 'INDEX'
+        <index-name=entity-name>
+        'ON'
+        <table-name=entity-name>
+        '(' [ [ <columns=expr> ]+ % ',' ] ')'
+        <index-option>*
+        ';'
+    }
+    proto rule index-option { * }
+    rule index-option:sym<COMPRESS> { 'COMPRESS' \d+ }
+    rule index-option:sym<GLOBAL-PARTITION> {
+        'GLOBAL' 'PARTITION' 'BY' 'RANGE'
+        '(' <identifier>+ % ',' ')'
+        '(' <partition-clause>+ % ',' ')'
+    }
+
+    rule partition-clause { 'PARTITION' <identifier> VALUES LESS THAN '(' <expr> ')' }
+
 }
 

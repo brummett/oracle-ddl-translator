@@ -57,6 +57,7 @@ class TranslateOracleDDL::ToPostgres {
     method value:sym<systimestamp-function> ($/)    { make 'LOCALTIMESTAMP' }
 
     method expr:sym<simple>              ($/)       { make $<expr-comparison>.made }
+    method expr:sym<atom>                ($/)       { make "$<identifier-or-value>" }
     method expr:sym<and-or>              ($/)       { make "{ @<expr-comparison>[0].made } $<and-or-keyword> { @<expr-comparison>[1].made }" }
     method expr:sym<recurse-and-or>      ($/)       {
         my Str $str = "( { @<expr>.shift.made } )";
@@ -69,7 +70,30 @@ class TranslateOracleDDL::ToPostgres {
     method expr-comparison:sym<operator> ($/)       { make "@<identifier-or-value>[0] $<comparison-operator> @<identifier-or-value>[1]" }
     method expr-comparison:sym<NULL>     ($/)       { make "$<identifier> $<null-test-operator>" }
     method expr-comparison:sym<IN>       ($/)       { make "$<identifier> IN ( { @<value>>>.made.join(', ') } )" }
-    method expr-comparison:sym<NOT>      ($/)       { make "NOT( { $<expr>.made } )" }
+    method expr-comparison:sym<not-f>    ($/)       { make "NOT( { $<expr>.made } )" }
+    method expr-comparison:sym<trunc-f>  ($/)       { make "trunc( { $<expr>.made } )" }
+    method expr-comparison:sym<to_char-f>($/)       { make "to_char( { $<expr>.made } )" }
+    method expr-comparison:sym<upper-f>  ($/)       { make "upper( { $<expr>.made } )" }
+    method expr-comparison:sym<lower-f>  ($/)       { make "lower( { $<expr>.made } )" }
+    method expr-comparison:sym<substr-f> ($/)       { make 'substr( ' ~ @<expr>>>.made.join(', ') ~ ' )' }
+    method expr-comparison:sym<decode-f> ($/)       {
+        my @cases;
+        for @<case> Z @<result> -> ($case, $result) {
+            @cases.push("WHEN $case THEN { $result.made }");
+        }
+        make "( CASE { $<topic>.made } "
+                ~ @cases.join(' ')
+                ~ " ELSE { $<default>.made } END )";
+    }
+
+    method case-when-clause         ($/)    { make "WHEN { $<case>.made } THEN { $<then>.made }" }
+    method else-clause              ($/)    { make "ELSE { $<expr>.made }" }
+    method expr-comparison:sym<CASE>($/)    {
+        make "CASE "
+                ~ $<when-clause>>>.made.join(' ')
+                ~ ( $<else-clause> ?? " { $<else-clause>.made }" !! '' )
+                ~ ' END';
+    }
 
     method sql-statement:sym<COMMENT-ON> ($/) {
         make "COMMENT ON $<entity-type> $<entity-name> IS { $<value>.made }"
@@ -149,5 +173,17 @@ class TranslateOracleDDL::ToPostgres {
 
     method alter-table-action:sym<ADD> ($/)             { make 'ADD ' ~ $<alter-table-action-add>.made }
     method alter-table-action-add:sym<CONSTRAINT> ($/)  { make $<table-constraint-def>.made }
+
+
+    method index-option:sym<COMPRESS> ($/) { make Str }
+    method index-option:sym<GLOBAL-PARTITION> ($/) { make Str }
+    method sql-statement:sym<CREATE-INDEX> ($/) {
+        my Str @parts = <CREATE>;
+        @parts.push('UNIQUE') if $<unique>;
+        @parts.push('INDEX', "$<index-name>", 'ON', "$<table-name>");
+        @parts.push('(', @<columns>>>.made.join(', '), ')');
+        @parts.push( | @<index-option>>>.made.grep({ $_ })>>.Str );
+        make @parts.join(' ');
+    }
 }
 
