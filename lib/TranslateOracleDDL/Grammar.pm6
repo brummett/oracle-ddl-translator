@@ -63,6 +63,7 @@ grammar TranslateOracleDDL::Grammar {
     rule expr-comparison:sym<NULL>      { :ignorecase <identifier> $<null-test-operator>=('IS' ['NOT']? 'NULL') }
     rule expr-comparison:sym<IN>        { :ignorecase <identifier> 'IN' '(' [ <value> + % ',' ] ')' }
     rule expr-comparison:sym<NOT>       { :ignorecase 'NOT' '(' <expr> ')' }
+    rule expr-comparison:sym<substr-f>  { :ignorecase 'substr' '(' <expr>**2..3 % ',' ')' }
 
     proto token entity-type { * }
     token entity-type:sym<TABLE> { <sym> }
