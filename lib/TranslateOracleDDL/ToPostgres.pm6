@@ -33,12 +33,20 @@ class TranslateOracleDDL::ToPostgres {
             !! make ~ $/;
     }
 
+    method entity-name ($/) {
+        my @parts = @<identifier>;
+        if @parts.elems > 1 and self.schema {
+            @parts[0] = self.schema;  # rewrite the schema if we're configured to
+        }
+        make join('.', @parts);
+    }
+
     method sql-statement:sym<CREATE-SEQUENCE> ($/) {
         if $<create-sequence-clause>.elems {
             my @clauses = $<create-sequence-clause>.map({ .made // ~ $_ }).grep({ $_ });
-            make "CREATE SEQUENCE $<entity-name> " ~ @clauses.join(' ');
+            make 'CREATE SEQUENCE ' ~ $<entity-name>.made ~ ' ' ~ @clauses.join(' ');
         } else {
-            make "CREATE SEQUENCE $<entity-name>";
+            make 'CREATE SEQUENCE ' ~ $<entity-name>.made;
         }
     }
 
@@ -98,13 +106,13 @@ class TranslateOracleDDL::ToPostgres {
     }
 
     method sql-statement:sym<COMMENT-ON> ($/) {
-        make "COMMENT ON $<entity-type> $<entity-name> IS { $<value>.made }"
+        make "COMMENT ON $<entity-type> { $<entity-name>.made } IS { $<value>.made }"
     }
 
     method sql-statement:sym<CREATE-TABLE> ($/) {
         my @columns = $<create-table-column-def>>>.made;
         my @constraints = $<table-constraint-def>>>.made;
-        make "CREATE TABLE $<entity-name> ( " ~ (|@columns, |@constraints).join(', ') ~ " )"
+        make "CREATE TABLE { $<entity-name>.made } ( " ~ (|@columns, |@constraints).join(', ') ~ " )"
     }
 
     method create-table-column-def ($/) {
@@ -162,14 +170,14 @@ class TranslateOracleDDL::ToPostgres {
     method table-constraint:sym<UNIQUE> ($/)      { make "UNIQUE ( { $<identifier>.join(', ') } )" }
     method table-constraint:sym<CHECK> ($/)       { make "CHECK ( { $<expr>.made } )" }
     method table-constraint:sym<FOREIGN-KEY> ($/) {
-        make "FOREIGN KEY ( { @<table-columns>.join(', ') } ) REFERENCES $<entity-name> ( { @<fk-columns>.join(', ') } )";
+        make "FOREIGN KEY ( { @<table-columns>.join(', ') } ) REFERENCES { $<entity-name>.made } ( { @<fk-columns>.join(', ') } )";
     }
 
     method constraint-deferrables:sym<DEFERRABLE> ($/) { make $/ }
     method constraint-deferrables:sym<INITIALLY> ($/)  { make $/ }
 
     method sql-statement:sym<ALTER-TABLE> ($/) {
-        make "ALTER TABLE $<entity-name> " ~ $<alter-table-action>.made;
+        make 'ALTER TABLE ' ~ $<entity-name>.made ~ ' ' ~ $<alter-table-action>.made;
     }
     method sql-statement:sym<ALTER-TABLE-ADD-CONSTRAINT-DISABLE> ($/) { make Str }
 
