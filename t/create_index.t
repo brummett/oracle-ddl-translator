@@ -36,7 +36,7 @@ subtest 'index options' => {
 }
 
 subtest 'functional index' => {
-    plan 3;
+    plan 4;
 
     is $xlate.parse('CREATE INDEX foo.fi ON foo.table ( substr(col, 1), substr(col2, 2, 3) );'),
         "CREATE INDEX foo.fi ON foo.table ( substr( col, 1 ), substr( col2, 2, 3 ) );\n",
@@ -54,4 +54,8 @@ subtest 'functional index' => {
         ORACLE
         "CREATE INDEX foo.bar ON foo.table ( substr( ( CASE ANALYSIS_APPROVAL WHEN 1 THEN FLOW_CELL_ID ELSE NULL END ), 1, 16 ) );\n",
         'real example with nested function calls';
+
+    is $xlate.parse('CREATE INDEX foo.idx ON foo.table ( TRUNC(column_name) );'),
+        "CREATE INDEX foo.idx ON foo.table ( trunc( column_name ) );\n",
+        'trunc function';
 }
