@@ -149,5 +149,15 @@ class TranslateOracleDDL::ToPostgres {
 
     method alter-table-action:sym<ADD> ($/)             { make 'ADD ' ~ $<alter-table-action-add>.made }
     method alter-table-action-add:sym<CONSTRAINT> ($/)  { make $<table-constraint-def>.made }
+
+
+    method sql-statement:sym<CREATE-INDEX> ($/) {
+        say $/.gist;
+        make 'CREATE '
+            ~ ( $<unique> ?? 'UNIQUE ' !! '' )
+            ~ "INDEX $<index-name> ON $<table-name> ( "
+            ~ $<columns>.join(', ')
+            ~ ' )';
+    }
 }
 

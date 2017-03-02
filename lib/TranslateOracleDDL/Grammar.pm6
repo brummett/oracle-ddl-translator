@@ -167,5 +167,15 @@ grammar TranslateOracleDDL::Grammar {
 
     proto rule alter-table-action-add { * }
     rule alter-table-action-add:sym<CONSTRAINT> { <table-constraint-def> }
+
+    token unique-keyword { 'UNIQUE' }
+    rule sql-statement:sym<CREATE-INDEX> {
+        'CREATE' <unique=unique-keyword>? 'INDEX'
+        <index-name=entity-name>
+        'ON'
+        <table-name=entity-name>
+        '(' [ <columns=identifier> + % ',' ] ')'
+        ';'
+    }
 }
 
