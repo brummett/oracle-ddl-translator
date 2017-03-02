@@ -1,6 +1,8 @@
 use v6;
 
 class TranslateOracleDDL::ToPostgres {
+    has $.schema;
+
     method TOP($/) {
         my Str $string = $<sql-statement>>>.made.grep({ $_ }).join(";\n");
         $string ~= ";\n" if $string.chars;
