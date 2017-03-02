@@ -151,13 +151,14 @@ class TranslateOracleDDL::ToPostgres {
     method alter-table-action-add:sym<CONSTRAINT> ($/)  { make $<table-constraint-def>.made }
 
 
+    method index-option:sym<COMPRESS> ($/) { make Str }
     method sql-statement:sym<CREATE-INDEX> ($/) {
-        say $/.gist;
-        make 'CREATE '
-            ~ ( $<unique> ?? 'UNIQUE ' !! '' )
-            ~ "INDEX $<index-name> ON $<table-name> ( "
-            ~ $<columns>.join(', ')
-            ~ ' )';
+        my Str @parts = <CREATE>;
+        @parts.push('UNIQUE') if $<unique>;
+        @parts.push('INDEX', "$<index-name>", 'ON', "$<table-name>");
+        @parts.push('(', @<columns>.join(', '), ')');
+        @parts.push( | @<index-option>>>.made.grep({ $_ })>>.Str );
+        make @parts.join(' ');
     }
 }
 

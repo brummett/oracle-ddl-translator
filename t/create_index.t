@@ -4,7 +4,7 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
-plan 2;
+plan 3;
 
 my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new);
 ok $xlate, 'created translator';
@@ -25,4 +25,12 @@ subtest 'basic' => {
     is $xlate.parse('CREATE UNIQUE INDEX foo.uniq ON foo.table ( col1 );'),
         "CREATE UNIQUE INDEX foo.uniq ON foo.table ( col1 );\n",
         'unique index';
+}
+
+subtest 'index options' => {
+    plan 1;
+
+    is $xlate.parse('CREATE INDEX foo.i ON foo.table ( col1 ) COMPRESS 1;'),
+        "CREATE INDEX foo.i ON foo.table ( col1 );\n",
+        'COMPRESS option is dropped';
 }

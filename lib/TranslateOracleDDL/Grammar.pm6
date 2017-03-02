@@ -175,7 +175,10 @@ grammar TranslateOracleDDL::Grammar {
         'ON'
         <table-name=entity-name>
         '(' [ <columns=identifier> + % ',' ] ')'
+        <index-option>*
         ';'
     }
+    proto rule index-option { * }
+    rule index-option:sym<COMPRESS> { 'COMPRESS' \d+ }
 }
 
