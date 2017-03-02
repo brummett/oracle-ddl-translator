@@ -70,7 +70,7 @@ class TranslateOracleDDL::ToPostgres {
     method expr-comparison:sym<operator> ($/)       { make "@<identifier-or-value>[0] $<comparison-operator> @<identifier-or-value>[1]" }
     method expr-comparison:sym<NULL>     ($/)       { make "$<identifier> $<null-test-operator>" }
     method expr-comparison:sym<IN>       ($/)       { make "$<identifier> IN ( { @<value>>>.made.join(', ') } )" }
-    method expr-comparison:sym<NOT>      ($/)       { make "NOT( { $<expr>.made } )" }
+    method expr-comparison:sym<not-f>    ($/)       { make "NOT( { $<expr>.made } )" }
     method expr-comparison:sym<substr-f> ($/)       { make 'substr( ' ~ @<expr>>>.made.join(', ') ~ ' )' }
 
     method sql-statement:sym<COMMENT-ON> ($/) {
