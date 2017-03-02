@@ -56,6 +56,7 @@ grammar TranslateOracleDDL::Grammar {
     rule expr:sym<recurse-and-or>       { [ '(' <expr> ')' ]**2..* % <and-or-keyword> }
     rule expr:sym<and-or>               { <expr-comparison> <and-or-keyword> <expr-comparison> }
     rule expr:sym<simple>               { <expr-comparison> }
+    rule expr:sym<atom>                 { <identifier-or-value> }
     token comparison-operator           { '=' }
     proto rule expr-comparison          { * }
     rule expr-comparison:sym<operator>  { <identifier-or-value> <comparison-operator> <identifier-or-value> }
@@ -174,7 +175,7 @@ grammar TranslateOracleDDL::Grammar {
         <index-name=entity-name>
         'ON'
         <table-name=entity-name>
-        '(' [ <columns=identifier> + % ',' ] ')'
+        '(' [ [ <columns=expr> ]+ % ',' ] ')'
         <index-option>*
         ';'
     }

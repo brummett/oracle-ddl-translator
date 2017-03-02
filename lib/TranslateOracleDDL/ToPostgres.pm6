@@ -57,6 +57,7 @@ class TranslateOracleDDL::ToPostgres {
     method value:sym<systimestamp-function> ($/)    { make 'LOCALTIMESTAMP' }
 
     method expr:sym<simple>              ($/)       { make $<expr-comparison>.made }
+    method expr:sym<atom>                ($/)       { make "$<identifier-or-value>" }
     method expr:sym<and-or>              ($/)       { make "{ @<expr-comparison>[0].made } $<and-or-keyword> { @<expr-comparison>[1].made }" }
     method expr:sym<recurse-and-or>      ($/)       {
         my Str $str = "( { @<expr>.shift.made } )";
@@ -156,7 +157,7 @@ class TranslateOracleDDL::ToPostgres {
         my Str @parts = <CREATE>;
         @parts.push('UNIQUE') if $<unique>;
         @parts.push('INDEX', "$<index-name>", 'ON', "$<table-name>");
-        @parts.push('(', @<columns>.join(', '), ')');
+        @parts.push('(', @<columns>>>.made.join(', '), ')');
         @parts.push( | @<index-option>>>.made.grep({ $_ })>>.Str );
         make @parts.join(' ');
     }
