@@ -84,6 +84,15 @@ class TranslateOracleDDL::ToPostgres {
                 ~ " ELSE { $<default>.made } END )";
     }
 
+    method case-when-clause         ($/)    { make "WHEN { $<case>.made } THEN { $<then>.made }" }
+    method else-clause              ($/)    { make "ELSE { $<expr>.made }" }
+    method expr-comparison:sym<CASE>($/)    {
+        make "CASE "
+                ~ $<when-clause>>>.made.join(' ')
+                ~ ( $<else-clause> ?? " { $<else-clause>.made }" !! '' )
+                ~ ' END';
+    }
+
     method sql-statement:sym<COMMENT-ON> ($/) {
         make "COMMENT ON $<entity-type> $<entity-name> IS { $<value>.made }"
     }
