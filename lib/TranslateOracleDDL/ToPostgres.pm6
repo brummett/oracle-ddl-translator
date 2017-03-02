@@ -72,6 +72,15 @@ class TranslateOracleDDL::ToPostgres {
     method expr-comparison:sym<IN>       ($/)       { make "$<identifier> IN ( { @<value>>>.made.join(', ') } )" }
     method expr-comparison:sym<not-f>    ($/)       { make "NOT( { $<expr>.made } )" }
     method expr-comparison:sym<substr-f> ($/)       { make 'substr( ' ~ @<expr>>>.made.join(', ') ~ ' )' }
+    method expr-comparison:sym<decode-f> ($/)       {
+        my @cases;
+        for @<case> Z @<result> -> ($case, $result) {
+            @cases.push("WHEN $case THEN { $result.made }");
+        }
+        make "( CASE { $<topic>.made } "
+                ~ @cases.join(' ')
+                ~ " ELSE { $<default>.made } END )";
+    }
 
     method sql-statement:sym<COMMENT-ON> ($/) {
         make "COMMENT ON $<entity-type> $<entity-name> IS { $<value>.made }"

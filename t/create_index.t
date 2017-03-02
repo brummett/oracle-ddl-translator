@@ -36,9 +36,22 @@ subtest 'index options' => {
 }
 
 subtest 'functional index' => {
-    plan 1;
+    plan 3;
 
     is $xlate.parse('CREATE INDEX foo.fi ON foo.table ( substr(col, 1), substr(col2, 2, 3) );'),
         "CREATE INDEX foo.fi ON foo.table ( substr( col, 1 ), substr( col2, 2, 3 ) );\n",
         'substr functional index';
+
+    is $xlate.parse(q{CREATE INDEX foo.decode ON foo.table ( DECODE(col, 1, col1, '2', col2, NULL) );}),
+        "CREATE INDEX foo.decode ON foo.table ( ( CASE col WHEN 1 THEN col1 WHEN '2' THEN col2 ELSE NULL END ) );\n",
+        'decode functional index';
+
+    is $xlate.parse(q :to<ORACLE> ),
+        CREATE INDEX foo.bar ON foo.table
+            (
+                SUBSTR(DECODE(ANALYSIS_APPROVAL,1,FLOW_CELL_ID,NULL),1,16)
+            );
+        ORACLE
+        "CREATE INDEX foo.bar ON foo.table ( substr( ( CASE ANALYSIS_APPROVAL WHEN 1 THEN FLOW_CELL_ID ELSE NULL END ), 1, 16 ) );\n",
+        'real example with nested function calls';
 }

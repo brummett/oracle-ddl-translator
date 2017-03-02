@@ -64,6 +64,7 @@ grammar TranslateOracleDDL::Grammar {
     rule expr-comparison:sym<IN>        { :ignorecase <identifier> 'IN' '(' [ <value> + % ',' ] ')' }
     rule expr-comparison:sym<not-f>     { :ignorecase 'NOT' '(' <expr> ')' }
     rule expr-comparison:sym<substr-f>  { :ignorecase 'substr' '(' <expr>**2..3 % ',' ')' }
+    rule expr-comparison:sym<decode-f>  { :ignorecase 'decode' '(' <topic=expr> ',' [ [ <case=value> ',' <result=expr> ]+? % ',' ] ',' <default=expr> ')' }
 
     proto token entity-type { * }
     token entity-type:sym<TABLE> { <sym> }
