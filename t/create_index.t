@@ -36,7 +36,7 @@ subtest 'index options' => {
 }
 
 subtest 'functional index' => {
-    plan 4;
+    plan 5;
 
     is $xlate.parse('CREATE INDEX foo.fi ON foo.table ( substr(col, 1), substr(col2, 2, 3) );'),
         "CREATE INDEX foo.fi ON foo.table ( substr( col, 1 ), substr( col2, 2, 3 ) );\n",
@@ -58,4 +58,8 @@ subtest 'functional index' => {
     is $xlate.parse('CREATE INDEX foo.idx ON foo.table ( TRUNC(column_name) );'),
         "CREATE INDEX foo.idx ON foo.table ( trunc( column_name ) );\n",
         'trunc function';
+
+    is $xlate.parse('CREATE INDEX foo.idx ON foo.table ( TO_CHAR(column_name) );'),
+        "CREATE INDEX foo.idx ON foo.table ( to_char( column_name ) );\n",
+        'to_char function';
 }
