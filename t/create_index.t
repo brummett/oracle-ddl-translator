@@ -93,5 +93,4 @@ subtest 'functional index' => {
     is $xlate.parse('CREATE INDEX foo.idx ON foo.table ( TO_CHAR(CASE WHEN col1 IS NOT NULL THEN col2 WHEN col1 = 1 THEN col3 ELSE col4 END));'),
         "CREATE INDEX foo.idx ON foo.table ( to_char( CASE WHEN col1 IS NOT NULL THEN col2 WHEN col1 = 1 THEN col3 ELSE col4 END ) );\n",
         'CASE inside to_char()';
-        'to_char function';
 }
