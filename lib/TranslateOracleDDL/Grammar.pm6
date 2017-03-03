@@ -205,7 +205,10 @@ grammar TranslateOracleDDL::Grammar {
         <columns=select-column>+ % ','
         'FROM'
         <table-name=entity-name>
+        <where-clause>?
         ';'
     }
+
+    rule where-clause { 'WHERE' <expr> }
 }
 
