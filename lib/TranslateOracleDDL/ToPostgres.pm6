@@ -4,17 +4,14 @@ class TranslateOracleDDL::ToPostgres {
     has $.schema;
 
     method TOP($/) {
-        my Str $string = $<input-line>>>.made.grep({ $_ }).join(";\n");
-        $string ~= ";\n" if $string.chars;
-        make $string;
+        make $<input-line>>>.made.grep({ $_ }).join("\n") ~ "\n";
     }
 
     method input-line:sym<sqlplus-directive>    ($/) { make $<sqlplus-directive>.made }
-    method input-line:sym<sql-statement>        ($/) { make $<sql-statement>.made }
+    method input-line:sym<sql-statement>        ($/) { make $<sql-statement>.made ?? "{$<sql-statement>.made};" !! Str }
 
     method sqlplus-directive:sym<REM>   ($/) { make '--' ~ ($<string-to-end-of-line> || '') }
     method sqlplus-directive:sym<PROMPT>($/) { make "\\echo" ~ ($<string-to-end-of-line> ?? " $<string-to-end-of-line>" !! '') }
-
 
     method bigint ($/) {
         make $/ > 9223372036854775807

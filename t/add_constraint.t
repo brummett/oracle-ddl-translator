@@ -119,7 +119,7 @@ subtest 'DISABLEd' => {
     plan 2;
 
     is $xlate.parse('ALTER TABLE foo.ck ADD CONSTRAINT ck_constr CHECK (col_name = 1) NOT DEFERRABLE INITIALLY IMMEDIATE DISABLE;'),
-        '',
+        "\n",
         'DISABLEd constraints disappear';
 
     is $xlate.parse(q :to<ORACLE>),
@@ -132,6 +132,6 @@ subtest 'DISABLEd' => {
             INITIALLY
             DISABLE;
         ORACLE
-        '',
+        "\n",
         'broken CHECK constraint disappears';
 }

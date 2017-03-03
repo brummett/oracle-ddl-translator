@@ -44,9 +44,9 @@ subtest 'mixed stuff' => {
                NOORDER;
             ORACLE
         q :to<POSTGRES>,
-            --     SCHEMA_USER.TP_SEQ;
-            --     GSCUSER.ASP_SEQ;
-            \echo CREATE SEQUENCE SCHEMA_USER.acct_seq;
+            --     SCHEMA_USER.TP_SEQ
+            --     GSCUSER.ASP_SEQ
+            \echo CREATE SEQUENCE SCHEMA_USER.acct_seq
             CREATE SEQUENCE SCHEMA_USER.acct_seq START WITH 956 INCREMENT BY 1 MINVALUE 1 NO MAXVALUE NO CYCLE;
             POSTGRES
         'example 1';
