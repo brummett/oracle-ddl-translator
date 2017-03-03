@@ -1,7 +1,7 @@
 use v6;
 
 grammar TranslateOracleDDL::Grammar {
-    token TOP {
+    rule TOP {
         <sql-statement>+
     }
 
@@ -23,7 +23,15 @@ grammar TranslateOracleDDL::Grammar {
         \v+
     }
 
-    token identifier { \w+ }
+    proto token identifier { * }
+    token identifier:sym<bareword> { <[$\w]>+ }
+    token identifier:sym<qq> {
+        '"'
+        [ <-["]>+:
+            | '""'
+        ]*
+        '"'
+    }
     token bigint { \d+ }
     token integer { \d+ }
     token entity-name {
@@ -40,6 +48,30 @@ grammar TranslateOracleDDL::Grammar {
         "'"
     }
     token value:sym<systimestamp-function> { 'systimestamp' }
+
+    token identifier-or-value           { <identifier> | <value> }
+
+    token and-or-keyword                { :ignorecase 'and' | 'or' }
+    proto rule expr { * }
+    rule expr:sym<recurse-and-or>       { [ '(' <expr> ')' ]**2..* % <and-or-keyword> }
+    rule expr:sym<and-or>               { <expr-comparison> <and-or-keyword> <expr-comparison> }
+    rule expr:sym<simple>               { <expr-comparison> }
+    rule expr:sym<atom>                 { <identifier-or-value> }
+    token comparison-operator           { '=' }
+    proto rule expr-comparison          { * }
+    rule expr-comparison:sym<operator>  { <identifier-or-value> <comparison-operator> <identifier-or-value> }
+    rule expr-comparison:sym<NULL>      { :ignorecase <identifier> $<null-test-operator>=('IS' ['NOT']? 'NULL') }
+    rule expr-comparison:sym<IN>        { :ignorecase <identifier> 'IN' '(' [ <value> + % ',' ] ')' }
+        rule case-when-clause           { :ignorecase 'WHEN' <case=expr> 'THEN' <then=expr> }
+        rule else-clause                { :ignorecase 'ELSE' <expr> }
+    rule expr-comparison:sym<CASE>      { :ignorecase 'CASE' <when-clause=case-when-clause>* <else-clause>? 'END' }
+    rule expr-comparison:sym<not-f>     { :ignorecase 'NOT' '(' <expr> ')' }
+    rule expr-comparison:sym<substr-f>  { :ignorecase 'substr' '(' <expr>**2..3 % ',' ')' }
+    rule expr-comparison:sym<decode-f>  { :ignorecase 'decode' '(' <topic=expr> ',' [ [ <case=value> ',' <result=expr> ]+? % ',' ] ',' <default=expr> ')' }
+    rule expr-comparison:sym<trunc-f>   { :ignorecase 'trunc' '(' <expr> ')' }
+    rule expr-comparison:sym<to_char-f> { :ignorecase 'to_char' '(' <expr> ')' }
+    rule expr-comparison:sym<upper-f>   { :ignorecase 'upper' '(' <expr> ')' }
+    rule expr-comparison:sym<lower-f>   { :ignorecase 'lower' '(' <expr> ')' }
 
     proto token entity-type { * }
     token entity-type:sym<TABLE> { <sym> }
@@ -106,9 +138,65 @@ grammar TranslateOracleDDL::Grammar {
     rule create-table-column-constraint:sym<PRIMARY-KEY> { 'PRIMARY KEY' }
     rule create-table-column-constraint:sym<DEFAULT> { 'DEFAULT' <value> }
 
-    rule table-constraint-def { 'CONSTRAINT' <identifier> <table-constraint> }
+    rule table-constraint-def { 'CONSTRAINT' <identifier> <table-constraint> <constraint-deferrables> * }
 
     proto rule table-constraint { * }
     rule table-constraint:sym<PRIMARY-KEY> { 'PRIMARY' 'KEY' '(' [ <identifier> + % ',' ] ')' }
+    rule table-constraint:sym<UNIQUE>      { 'UNIQUE' '(' [ <identifier> + % ',' ] ')' }
+    rule table-constraint:sym<CHECK>       { 'CHECK' '(' <expr> ')' }
+    rule table-constraint:sym<FOREIGN-KEY> {
+        'FOREIGN' 'KEY'
+        '(' [ <table-columns=identifier> + % ',' ] ')'
+        REFERENCES <entity-name>
+        '(' [ <fk-columns=identifier> + % ',' ] ')'
+    }
+
+    proto token constraint-deferrables { * }
+    token constraint-deferrables:sym<DEFERRABLE> { ['NOT' <ws>]? 'DEFERRABLE' }
+    token constraint-deferrables:sym<INITIALLY>  { 'INITIALLY' <ws> ['IMMEDIATE'|'DEFERRED'] }
+    token constraint-deferrables:sym<ENABLE-NOVALIDATE> { 'ENABLE' <ws> 'NOVALIDATE' }    # Postgres doesn't handle this
+
+    rule sql-statement:sym<ALTER-TABLE> {
+        'ALTER' 'TABLE'
+        <entity-name>
+        <alter-table-action>
+        ';'
+    }
+    rule sql-statement:sym<ALTER-TABLE-ADD-CONSTRAINT-DISABLE> {
+        'ALTER' 'TABLE'
+        \S+
+        'ADD' 'CONSTRAINT'
+        .*?
+        'DISABLE'
+        .*?
+        ';'
+    }
+
+    proto rule alter-table-action { * }
+    rule alter-table-action:sym<ADD> { 'ADD' <alter-table-action-add> }
+
+    proto rule alter-table-action-add { * }
+    rule alter-table-action-add:sym<CONSTRAINT> { <table-constraint-def> }
+
+    token unique-keyword { 'UNIQUE' }
+    rule sql-statement:sym<CREATE-INDEX> {
+        'CREATE' <unique=unique-keyword>? 'INDEX'
+        <index-name=entity-name>
+        'ON'
+        <table-name=entity-name>
+        '(' [ [ <columns=expr> ]+ % ',' ] ')'
+        <index-option>*
+        ';'
+    }
+    proto rule index-option { * }
+    rule index-option:sym<COMPRESS> { 'COMPRESS' \d+ }
+    rule index-option:sym<GLOBAL-PARTITION> {
+        'GLOBAL' 'PARTITION' 'BY' 'RANGE'
+        '(' <identifier>+ % ',' ')'
+        '(' <partition-clause>+ % ',' ')'
+    }
+
+    rule partition-clause { 'PARTITION' <identifier> VALUES LESS THAN '(' <expr> ')' }
+
 }
 
