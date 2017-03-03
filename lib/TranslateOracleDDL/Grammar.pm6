@@ -11,7 +11,7 @@ grammar TranslateOracleDDL::Grammar {
 
     proto rule input-line { * }
     rule input-line:sym<sqlplus-directive> { <sqlplus-directive> }
-    rule input-line:sym<sql-statement> { <sql-statement> }
+    rule input-line:sym<sql-statement> { <sql-statement> ';' }
 
     proto rule sqlplus-directive { * }
     token sqlplus-directive:sym<REM> {
@@ -83,11 +83,11 @@ grammar TranslateOracleDDL::Grammar {
 
     proto rule sql-statement { * }
     rule sql-statement:sym<COMMENT-ON> {
-        'COMMENT' 'ON' <entity-type> <entity-name> 'IS' <value> ';'
+        'COMMENT' 'ON' <entity-type> <entity-name> 'IS' <value>
     }
 
     token sql-statement:sym<CREATE-SEQUENCE> {
-        'CREATE SEQUENCE' <ws> <entity-name> [ <ws> <create-sequence-clause> ]* <ws>*? ';'
+        'CREATE SEQUENCE' <ws> <entity-name> [ <ws> <create-sequence-clause> ]* <ws>*?
     }
 
     proto token create-sequence-clause { * }
@@ -112,7 +112,6 @@ grammar TranslateOracleDDL::Grammar {
             [ ',' <table-constraint-def> ]*
         ')'
         <create-table-extra-oracle-stuff>*
-        ';'
     }
 
     rule create-table-column-def { <identifier> <column-type> <create-table-column-constraint>* }
@@ -161,20 +160,17 @@ grammar TranslateOracleDDL::Grammar {
     token constraint-deferrables:sym<INITIALLY>  { 'INITIALLY' <ws> ['IMMEDIATE'|'DEFERRED'] }
     token constraint-deferrables:sym<ENABLE-NOVALIDATE> { 'ENABLE' <ws> 'NOVALIDATE' }    # Postgres doesn't handle this
 
-    rule sql-statement:sym<ALTER-TABLE> {
-        'ALTER' 'TABLE'
-        <entity-name>
-        <alter-table-action>
-        ';'
-    }
     rule sql-statement:sym<ALTER-TABLE-ADD-CONSTRAINT-DISABLE> {
         'ALTER' 'TABLE'
         \S+
         'ADD' 'CONSTRAINT'
         .*?
         'DISABLE'
-        .*?
-        ';'
+    }
+    rule sql-statement:sym<ALTER-TABLE> {
+        'ALTER' 'TABLE'
+        <entity-name>
+        <alter-table-action>
     }
 
     proto rule alter-table-action { * }
@@ -191,7 +187,6 @@ grammar TranslateOracleDDL::Grammar {
         <table-name=entity-name>
         '(' [ [ <columns=expr> ]+ % ',' ] ')'
         <index-option>*
-        ';'
     }
     proto rule index-option { * }
     rule index-option:sym<COMPRESS> { 'COMPRESS' \d+ }
@@ -210,7 +205,6 @@ grammar TranslateOracleDDL::Grammar {
         'FROM'
         <table-name=entity-name>
         <where-clause>?
-        ';'
     }
 
     rule where-clause { 'WHERE' <expr> }
