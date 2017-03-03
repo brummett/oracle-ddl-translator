@@ -12,23 +12,9 @@ class TranslateOracleDDL::ToPostgres {
     method input-line:sym<sqlplus-directive>    ($/) { make $<sqlplus-directive>.made }
     method input-line:sym<sql-statement>        ($/) { make $<sql-statement>.made }
 
-    method sqlplus-directive:sym<REM> ($/) {
-        if $<string-to-end-of-line> {
-            make "-- $<string-to-end-of-line>";
-        } else {
-            make '--';
-        }
-    }
+    method sqlplus-directive:sym<REM>   ($/) { make '--' ~ ($<string-to-end-of-line> || '') }
+    method sqlplus-directive:sym<PROMPT>($/) { make "\\echo" ~ ($<string-to-end-of-line> ?? " $<string-to-end-of-line>" !! '') }
 
-    method sqlplus-directive:sym<PROMPT> ($/) {
-        if $<string-to-end-of-line> {
-            make "\\echo $<string-to-end-of-line>";
-        } else {
-            make "\\echo";
-        }
-    }
-
-    method sqlplus-directive:sym<empty-line> ($/) { return Str; }
 
     method bigint ($/) {
         make $/ > 9223372036854775807

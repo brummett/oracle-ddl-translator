@@ -15,9 +15,9 @@ subtest 'REM' => {
     my $output = $xlate.parse('REM This is a test');
     is $output, "-- This is a test;\n", 'translated REM';
 
-    is $xlate.parse("REM comment 1\nREM comment 2\nREM comment 3"),
-        "-- comment 1;\n-- comment 2;\n-- comment 3;\n",
-        'multiple REMs';
+    is $xlate.parse("REM comment 1\nREM      comment 2\nREM comment 3"),
+        "-- comment 1;\n--      comment 2;\n-- comment 3;\n",
+        'multiple REMs and whitespace';
 
     is $xlate.parse("REM comment 1\nREM\nREM comment 3\n"),
         "-- comment 1;\n--;\n-- comment 3;\n",
@@ -51,8 +51,8 @@ subtest 'mixed stuff' => {
             REM hi there
             ORACLE
         q :to<POSTGRES>,
-            -- SCHEMA_USER.TP_SEQ;
-            -- GSCUSER.ASP_SEQ;
+            --     SCHEMA_USER.TP_SEQ;
+            --     GSCUSER.ASP_SEQ;
             \echo CREATE SEQUENCE SCHEMA_USER.acct_seq;
             -- hi there;
             POSTGRES

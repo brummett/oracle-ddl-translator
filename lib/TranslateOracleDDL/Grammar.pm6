@@ -14,17 +14,8 @@ grammar TranslateOracleDDL::Grammar {
     rule input-line:sym<sql-statement> { <sql-statement> ';' }
 
     proto rule sqlplus-directive { * }
-    token sqlplus-directive:sym<REM> {
-        'REM' [ \h+ <string-to-end-of-line> ]? \v?
-    }
-
-    token sqlplus-directive:sym<PROMPT> {
-        'PROMPT' [ \h+ <string-to-end-of-line> ]? \v?
-    }
-
-    token sqlplus-directive:sym<empty-line> {  # happens between statements
-        \v+
-    }
+    rule sqlplus-directive:sym<REM>     { ['REM'<?before \v>]    | ['REM'<string-to-end-of-line>] } 
+    rule sqlplus-directive:sym<PROMPT>  { ['PROMPT'<?before \v>] | ['PROMPT' <string-to-end-of-line>] }
 
     proto token identifier { * }
     token identifier:sym<bareword> { <[$\w]>+ }
@@ -86,23 +77,23 @@ grammar TranslateOracleDDL::Grammar {
         'COMMENT' 'ON' <entity-type> <entity-name> 'IS' <value>
     }
 
-    token sql-statement:sym<CREATE-SEQUENCE> {
-        'CREATE SEQUENCE' <ws> <entity-name> [ <ws> <create-sequence-clause> ]* <ws>*?
+    rule sql-statement:sym<CREATE-SEQUENCE> {
+        'CREATE' 'SEQUENCE' <entity-name> <create-sequence-clause>*
     }
 
-    proto token create-sequence-clause { * }
-    token create-sequence-clause:sym<START-WITH>     { 'START WITH' <ws> <bigint> }
-    token create-sequence-clause:sym<INCREMENT-BY>   { 'INCREMENT BY' <ws> <bigint> }
-    token create-sequence-clause:sym<MINVALUE>       { 'MINVALUE' <ws> <bigint> }
-    token create-sequence-clause:sym<NOMINVALUE>     { 'NOMINVALUE' }
-    token create-sequence-clause:sym<MAXVALUE>       { 'MAXVALUE' <ws> <bigint> }
-    token create-sequence-clause:sym<NOMAXVALUE>     { 'NOMAXVALUE' }
-    token create-sequence-clause:sym<CACHE>          { 'CACHE' <ws> <bigint> }
-    token create-sequence-clause:sym<NOCACHE>        { 'NOCACHE' }
-    token create-sequence-clause:sym<CYCLE>          { 'CYCLE' }
-    token create-sequence-clause:sym<NOCYCLE>        { 'NOCYCLE' }
-    token create-sequence-clause:sym<ORDER>          { 'ORDER' }
-    token create-sequence-clause:sym<NOORDER>        { 'NOORDER' }
+    proto rule create-sequence-clause { * }
+    rule create-sequence-clause:sym<START-WITH>     { 'START' 'WITH' <bigint> }
+    rule create-sequence-clause:sym<INCREMENT-BY>   { 'INCREMENT' 'BY' <bigint> }
+    rule create-sequence-clause:sym<MINVALUE>       { 'MINVALUE' <bigint> }
+    rule create-sequence-clause:sym<NOMINVALUE>     { 'NOMINVALUE' }
+    rule create-sequence-clause:sym<MAXVALUE>       { 'MAXVALUE' <bigint> }
+    rule create-sequence-clause:sym<NOMAXVALUE>     { 'NOMAXVALUE' }
+    rule create-sequence-clause:sym<CACHE>          { 'CACHE' <bigint> }
+    rule create-sequence-clause:sym<NOCACHE>        { 'NOCACHE' }
+    rule create-sequence-clause:sym<CYCLE>          { 'CYCLE' }
+    rule create-sequence-clause:sym<NOCYCLE>        { 'NOCYCLE' }
+    rule create-sequence-clause:sym<ORDER>          { 'ORDER' }
+    rule create-sequence-clause:sym<NOORDER>        { 'NOORDER' }
 
     rule sql-statement:sym<CREATE-TABLE> {
         'CREATE TABLE'
