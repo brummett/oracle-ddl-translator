@@ -32,7 +32,7 @@ subtest 'basic' => {
 subtest 'AS clause' => {
     plan 2;
 
-    is $xlate.parse(q{SELECT col1 AS alias_col1, col2 AS "alias_col2" FROM foo.table;}),
+    is $xlate.parse(q{SELECT col1 AS alias_col1, col2 as "alias_col2" FROM foo.table;}),
         "SELECT col1 AS alias_col1, col2 AS \"alias_col2\" FROM foo.table;\n",
         'basic AS';
 
