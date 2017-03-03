@@ -4,7 +4,7 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
-plan 2;
+plan 3;
 
 my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new);
 ok $xlate, 'created translator';
@@ -23,4 +23,12 @@ subtest 'basic' => {
     is $xlate.parse(q{SELECT col1, decode(sign(col2), -1, 'foo', NULL) FROM foo.table;}),
         "SELECT col1, ( CASE sign( col2 ) WHEN -1 THEN 'foo' ELSE NULL END ) FROM foo.table;\n",
         'function in place of column';
+}
+
+subtest 'AS clause' => {
+    plan 1;
+
+    is $xlate.parse(q{SELECT col1 AS alias_col1, col2 AS "alias_col2" FROM foo.table;}),
+        "SELECT col1 AS alias_col1, col2 AS \"alias_col2\" FROM foo.table;\n",
+        'basic AS';
 }

@@ -199,9 +199,10 @@ grammar TranslateOracleDDL::Grammar {
 
     rule partition-clause { 'PARTITION' <identifier> VALUES LESS THAN '(' <expr> ')' }
 
+    rule select-column { <expr> [ 'AS' <alias=identifier> ]? }
     rule sql-statement:sym<SELECT> {
         'SELECT'
-        <columns=expr>+ % ','
+        <columns=select-column>+ % ','
         'FROM'
         <table-name=entity-name>
         ';'

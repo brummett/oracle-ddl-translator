@@ -197,6 +197,7 @@ class TranslateOracleDDL::ToPostgres {
         make @parts.join(' ');
     }
 
+    method select-column ($/) { make $<expr>.made ~ ( $<alias> ?? " AS $<alias>" !! '' ) }
     method sql-statement:sym<SELECT> ($/) { make "SELECT { $<columns>>>.made.join(', ') } FROM { $<table-name>.made }" }
 }
 
