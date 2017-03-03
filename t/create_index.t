@@ -69,8 +69,8 @@ subtest 'functional index' => {
         "CREATE INDEX foo.fi ON foo.table ( substr( col, 1 ), substr( col2, 2, 3 ) );\n",
         'substr functional index';
 
-    is $xlate.parse(q{CREATE INDEX foo.decode ON foo.table ( DECODE(col, 1, col1, '2', col2, NULL) );}),
-        "CREATE INDEX foo.decode ON foo.table ( ( CASE col WHEN 1 THEN col1 WHEN '2' THEN col2 ELSE NULL END ) );\n",
+    is $xlate.parse(q{CREATE INDEX foo.decode ON foo.table ( DECODE(col, -1, col1, '2', col2, NULL) );}),
+        "CREATE INDEX foo.decode ON foo.table ( ( CASE col WHEN -1 THEN col1 WHEN '2' THEN col2 ELSE NULL END ) );\n",
         'decode functional index';
 
     is $xlate.parse(q :to<ORACLE> ),

@@ -39,7 +39,7 @@ grammar TranslateOracleDDL::Grammar {
     }
 
     proto token value { * }
-    token value:sym<number-value> { \d+ }
+    token value:sym<number-value> { '-'? \d+ }
     token value:sym<string-value> {
         "'"
         [ <-[']>+:
