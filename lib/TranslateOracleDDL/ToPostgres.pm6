@@ -65,7 +65,7 @@ class TranslateOracleDDL::ToPostgres {
         make $str;
     }
 
-    method expr-comparison:sym<operator> ($/)       { make "{@<identifier-or-value>[0].made} $<comparison-operator> {@<identifier-or-value>[1].made}" }
+    method expr-comparison:sym<operator> ($/)       { make "{@<identifier-or-value>[0].made} $<expr-operator> {@<identifier-or-value>[1].made}" }
     method expr-comparison:sym<NULL>     ($/)       { make "$<identifier> $<null-test-operator>" }
     method expr-comparison:sym<IN>       ($/)       { make "$<identifier> IN ( { @<value>>>.made.join(', ') } )" }
     method expr-comparison:sym<not-f>    ($/)       { make "NOT( { $<expr>.made } )" }

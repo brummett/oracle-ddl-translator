@@ -63,7 +63,7 @@ subtest 'index options' => {
 }
 
 subtest 'functional index' => {
-    plan 9;
+    plan 11;
 
     is $xlate.parse('CREATE INDEX foo.fi ON foo.table ( substr(col, 1), substr(col2, 2, 3) );'),
         "CREATE INDEX foo.fi ON foo.table ( substr( col, 1 ), substr( col2, 2, 3 ) );\n",
@@ -105,4 +105,12 @@ subtest 'functional index' => {
     is $xlate.parse('CREATE INDEX foo.sign ON foo.table ( sign(col) );'),
         "CREATE INDEX foo.sign ON foo.table ( sign( col ) );\n",
         'sign function';
+
+    is $xlate.parse('CREATE INDEX foo.sub ON foo.table ( col-1000 );'),
+        "CREATE INDEX foo.sub ON foo.table ( col - 1000 );\n",
+        'subtraction operator';
+
+    is $xlate.parse('CREATE INDEX foo.sub ON foo.table ( col+1000 );'),
+        "CREATE INDEX foo.sub ON foo.table ( col + 1000 );\n",
+        'addition operator';
 }

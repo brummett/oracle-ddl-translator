@@ -45,15 +45,19 @@ grammar TranslateOracleDDL::Grammar {
 
     token identifier-or-value           { <entity-name> | <value> }
 
+    proto token expr-operator     { * }
+    token expr-operator:sym<eq>   { '=' }
+    token expr-operator:sym<sub>  { '-' }
+    token expr-operator:sym<add>  { '+' }
+
     token and-or-keyword                { :ignorecase 'and' | 'or' }
     proto rule expr { * }
     rule expr:sym<recurse-and-or>       { [ '(' <expr> ')' ]**2..* % <and-or-keyword> }
     rule expr:sym<and-or>               { <expr-comparison> <and-or-keyword> <expr-comparison> }
     rule expr:sym<simple>               { <expr-comparison> }
     rule expr:sym<atom>                 { <identifier-or-value> }
-    token comparison-operator           { '=' }
     proto rule expr-comparison          { * }
-    rule expr-comparison:sym<operator>  { <identifier-or-value> <comparison-operator> <identifier-or-value> }
+    rule expr-comparison:sym<operator>  { <identifier-or-value> <expr-operator> <identifier-or-value> }
     rule expr-comparison:sym<NULL>      { :ignorecase <identifier> $<null-test-operator>=('IS' ['NOT']? 'NULL') }
     rule expr-comparison:sym<IN>        { :ignorecase <identifier> 'IN' '(' [ <value> + % ',' ] ')' }
         rule case-when-clause           { :ignorecase 'WHEN' <case=expr> 'THEN' <then=expr> }
