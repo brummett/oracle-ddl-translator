@@ -146,6 +146,7 @@ class TranslateOracleDDL::ToPostgres {
 
     method create-table-column-constraint:sym<NOT-NULL> ($/) { make 'NOT NULL' }
     method create-table-column-constraint:sym<PRIMARY-KEY> ($/) { make 'PRIMARY KEY' }
+
     method create-table-column-constraint:sym<DEFAULT> ($/) { make "DEFAULT { $<value>.made }" }
 
     method table-constraint-def ($/)        {
@@ -157,6 +158,7 @@ class TranslateOracleDDL::ToPostgres {
     }
 
     method table-constraint:sym<PRIMARY-KEY> ($/) { make "PRIMARY KEY ( { $<identifier>.join(', ') } )" }
+
     method table-constraint:sym<UNIQUE> ($/)      { make "UNIQUE ( { $<identifier>.join(', ') } )" }
     method table-constraint:sym<CHECK> ($/)       { make "CHECK ( { $<expr>.made } )" }
     method table-constraint:sym<FOREIGN-KEY> ($/) {
@@ -184,6 +186,15 @@ class TranslateOracleDDL::ToPostgres {
         @parts.push('(', @<columns>>>.made.join(', '), ')');
         @parts.push( | @<index-option>>>.made.grep({ $_ })>>.Str );
         make @parts.join(' ');
+
+
+    method sql-statement:sym<SELECT> ($/) {
+        make "SELECT $<select-column-list>FROM $<rest-of-select>"
+    }        
+
+    method sql-statement:sym<VIEW> ($/) {
+        make "CREATE OR REPLACE VIEW $<view-table-def>"~"( $<select-column-list>) AS $<sql-statement>"
+
     }
 }
 

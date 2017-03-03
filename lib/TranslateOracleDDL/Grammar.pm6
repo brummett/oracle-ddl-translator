@@ -1,4 +1,5 @@
 use v6;
+use Grammar::Tracer;
 
 grammar TranslateOracleDDL::Grammar {
     rule TOP {
@@ -136,6 +137,7 @@ grammar TranslateOracleDDL::Grammar {
     proto rule create-table-column-constraint { * }
     rule create-table-column-constraint:sym<NOT-NULL> { 'NOT NULL' }
     rule create-table-column-constraint:sym<PRIMARY-KEY> { 'PRIMARY KEY' }
+
     rule create-table-column-constraint:sym<DEFAULT> { 'DEFAULT' <value> }
 
     rule table-constraint-def { 'CONSTRAINT' <identifier> <table-constraint> <constraint-deferrables> * }
@@ -197,6 +199,36 @@ grammar TranslateOracleDDL::Grammar {
     }
 
     rule partition-clause { 'PARTITION' <identifier> VALUES LESS THAN '(' <expr> ')' }
+
+    rule sql-statement:sym<SELECT> {
+        'SELECT'
+        <select-column-list>
+        ['FROM'|'from'] <rest-of-select>
+    }
+
+    rule select-column-list { <select-column-def>+ % ',' }
+
+    proto rule select-column-def { * }
+    rule select-column-def:sym<COLUMN-NAME> { <identifier> }
+    rule select-column-def:sym<QUOTED-COLUMN-NAME> { '"' <identifier> '"' }
+
+    rule rest-of-select { [ <string-to-end-of-line> ]? }
+
+    # Views
+
+    rule sql-statement:sym<VIEW> {
+        #{say "Starting VIEW consumption ";
+        # say $¢.orig().substr($¢.pos()) }
+        'CREATE OR REPLACE VIEW'
+        <view-table-def>
+        '(' <select-column-list> ')'
+        'AS'
+        #{say "AS looks like $3 " ~ $3.postmatch }
+        <sql-statement>
+    }
+
+    rule view-table-def { <entity-name> }
+    
 
 }
 
