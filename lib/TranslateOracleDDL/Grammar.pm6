@@ -2,24 +2,27 @@ use v6;
 
 grammar TranslateOracleDDL::Grammar {
     rule TOP {
-        <sql-statement>+
+        <input-line>+
     }
 
     token string-to-end-of-line {
         \V+
     }
 
-    proto rule sql-statement { * }
+    proto rule input-line { * }
+    rule input-line:sym<sqlplus-directive> { <sqlplus-directive> }
+    rule input-line:sym<sql-statement> { <sql-statement> }
 
-    token sql-statement:sym<REM> {
+    proto rule sqlplus-directive { * }
+    token sqlplus-directive:sym<REM> {
         'REM' [ \h+ <string-to-end-of-line> ]? \v?
     }
 
-    token sql-statement:sym<PROMPT> {
+    token sqlplus-directive:sym<PROMPT> {
         'PROMPT' [ \h+ <string-to-end-of-line> ]? \v?
     }
 
-    token sql-statement:sym<empty-line> {  # happens between statements
+    token sqlplus-directive:sym<empty-line> {  # happens between statements
         \v+
     }
 
@@ -78,6 +81,7 @@ grammar TranslateOracleDDL::Grammar {
     token entity-type:sym<TABLE> { <sym> }
     token entity-type:sym<COLUMN> { <sym> }
 
+    proto rule sql-statement { * }
     rule sql-statement:sym<COMMENT-ON> {
         'COMMENT' 'ON' <entity-type> <entity-name> 'IS' <value> ';'
     }

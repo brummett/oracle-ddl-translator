@@ -4,12 +4,15 @@ class TranslateOracleDDL::ToPostgres {
     has $.schema;
 
     method TOP($/) {
-        my Str $string = $<sql-statement>>>.made.grep({ $_ }).join(";\n");
+        my Str $string = $<input-line>>>.made.grep({ $_ }).join(";\n");
         $string ~= ";\n" if $string.chars;
         make $string;
     }
 
-    method sql-statement:sym<REM> ($/) {
+    method input-line:sym<sqlplus-directive>    ($/) { make $<sqlplus-directive>.made }
+    method input-line:sym<sql-statement>        ($/) { make $<sql-statement>.made }
+
+    method sqlplus-directive:sym<REM> ($/) {
         if $<string-to-end-of-line> {
             make "-- $<string-to-end-of-line>";
         } else {
@@ -17,7 +20,7 @@ class TranslateOracleDDL::ToPostgres {
         }
     }
 
-    method sql-statement:sym<PROMPT> ($/) {
+    method sqlplus-directive:sym<PROMPT> ($/) {
         if $<string-to-end-of-line> {
             make "\\echo $<string-to-end-of-line>";
         } else {
@@ -25,7 +28,7 @@ class TranslateOracleDDL::ToPostgres {
         }
     }
 
-    method sql-statement:sym<empty-line> ($/) { return Any; }
+    method sqlplus-directive:sym<empty-line> ($/) { return Str; }
 
     method bigint ($/) {
         make $/ > 9223372036854775807
