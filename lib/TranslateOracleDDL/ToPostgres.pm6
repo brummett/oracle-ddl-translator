@@ -195,5 +195,7 @@ class TranslateOracleDDL::ToPostgres {
         @parts.push( | @<index-option>>>.made.grep({ $_ })>>.Str );
         make @parts.join(' ');
     }
+
+    method sql-statement:sym<SELECT> ($/) { make "SELECT { $<columns>>>.made.join(', ') } FROM { $<table-name>.made }" }
 }
 
