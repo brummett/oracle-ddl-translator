@@ -85,6 +85,7 @@ class TranslateOracleDDL::ToPostgres {
     method expr-comparison:sym<to_char-f>($/)       { make "to_char( { $<expr>.made } )" }
     method expr-comparison:sym<upper-f>  ($/)       { make "upper( { $<expr>.made } )" }
     method expr-comparison:sym<lower-f>  ($/)       { make "lower( { $<expr>.made } )" }
+    method expr-comparison:sym<sign-f>   ($/)       { make "sign( { $<expr>.made } )" }
     method expr-comparison:sym<substr-f> ($/)       { make 'substr( ' ~ @<expr>>>.made.join(', ') ~ ' )' }
     method expr-comparison:sym<decode-f> ($/)       {
         my @cases;
