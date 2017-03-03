@@ -43,7 +43,7 @@ grammar TranslateOracleDDL::Grammar {
     }
     token value:sym<systimestamp-function> { 'systimestamp' }
 
-    token identifier-or-value           { <identifier> | <value> }
+    token identifier-or-value           { <entity-name> | <value> }
 
     token and-or-keyword                { :ignorecase 'and' | 'or' }
     proto rule expr { * }

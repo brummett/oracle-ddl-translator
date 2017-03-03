@@ -48,12 +48,14 @@ class TranslateOracleDDL::ToPostgres {
     method create-sequence-clause:sym<ORDER> ($/)       { make '' }
     method create-sequence-clause:sym<NOORDER> ($/)     { make '' }
 
+    method identifier-or-value ($/) { make $<entity-name> ?? $<entity-name>.made !! $<value> }
+
     method value:sym<number-value> ($/)             { make "$/" }
     method value:sym<string-value> ($/)             { make "$/" }
     method value:sym<systimestamp-function> ($/)    { make 'LOCALTIMESTAMP' }
 
     method expr:sym<simple>              ($/)       { make $<expr-comparison>.made }
-    method expr:sym<atom>                ($/)       { make "$<identifier-or-value>" }
+    method expr:sym<atom>                ($/)       { make $<identifier-or-value>.made }
     method expr:sym<and-or>              ($/)       { make "{ @<expr-comparison>[0].made } $<and-or-keyword> { @<expr-comparison>[1].made }" }
     method expr:sym<recurse-and-or>      ($/)       {
         my Str $str = "( { @<expr>.shift.made } )";
@@ -63,7 +65,7 @@ class TranslateOracleDDL::ToPostgres {
         make $str;
     }
 
-    method expr-comparison:sym<operator> ($/)       { make "@<identifier-or-value>[0] $<comparison-operator> @<identifier-or-value>[1]" }
+    method expr-comparison:sym<operator> ($/)       { make "{@<identifier-or-value>[0].made} $<comparison-operator> {@<identifier-or-value>[1].made}" }
     method expr-comparison:sym<NULL>     ($/)       { make "$<identifier> $<null-test-operator>" }
     method expr-comparison:sym<IN>       ($/)       { make "$<identifier> IN ( { @<value>>>.made.join(', ') } )" }
     method expr-comparison:sym<not-f>    ($/)       { make "NOT( { $<expr>.made } )" }

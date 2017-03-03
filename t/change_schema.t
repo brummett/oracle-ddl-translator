@@ -18,7 +18,7 @@ subtest 'no schema change' => {
 }
 
 subtest 'change schema name' => {
-    plan 3;
+    plan 4;
 
     my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new(schema => 'bar'));
     ok $xlate, 'created translator';
@@ -29,5 +29,9 @@ subtest 'change schema name' => {
 
     is $xlate.parse("COMMENT ON COLUMN foo.table.column IS 'hi there';"),
         "COMMENT ON COLUMN bar.table.column IS 'hi there';\n",
-        'changed schema.table.column';
+        'changed schema.table.column in COMMENT';
+
+    is $xlate.parse('SELECT foo.table.col FROM foo.table;'),
+        "SELECT bar.table.col FROM bar.table;\n",
+        'changed schema.table.column in SELECT';
 }
