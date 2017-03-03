@@ -4,7 +4,7 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
-plan 5;
+plan 6;
 
 my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new);
 ok $xlate, 'created translator';
@@ -29,7 +29,7 @@ subtest 'basic' => {
         'case-insensitive';
 }
 
-subtest 'AS clause' => {
+subtest 'column AS clause' => {
     plan 2;
 
     is $xlate.parse(q{SELECT col1 AS alias_col1, col2 as "alias_col2" FROM foo.table;}),
@@ -57,4 +57,16 @@ subtest 'join' => {
         "SELECT schema.table1.col1, schema.table2.col2 FROM schema.table1, schema.table2;\n",
         'simple join';
 
+}
+
+subtest 'table AS clause' => {
+    plan 2;
+
+    is $xlate.parse(q{SELECT t.col FROM table AS t;}),
+        "SELECT t.col FROM table AS t;\n",
+        'basic AS';
+
+    is $xlate.parse(q{SELECT t.col FROM table t;}),
+        "SELECT t.col FROM table AS t;\n",
+        'implied AS';
 }

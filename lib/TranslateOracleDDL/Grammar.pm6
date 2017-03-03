@@ -205,13 +205,15 @@ grammar TranslateOracleDDL::Grammar {
         [ 'WITH' 'READ' 'ONLY']?
     }
 
-    rule select-column { :ignorecase <expr> [ 'AS'? <alias=identifier> <?{ $<identifier>.uc ne 'FROM' }>]? }
+    my $illegal-as-alias = 'FROM' | 'WHERE' | 'WITH';
+    rule select-column { :ignorecase <expr> [ 'AS'? <alias=identifier> <?{ $<alias>.uc ne $illegal-as-alias }>]? }
+    rule select-from-table { <table-name=entity-name> [ 'AS'? <alias=identifier> <?{ $<alias>.uc ne $illegal-as-alias }>]? }
     rule sql-statement:sym<SELECT> {
         :ignorecase
         'SELECT'
         <columns=select-column>+ % ','
         'FROM'
-        <table-name=entity-name> + % ','
+        <select-from-table> + % ','
         <where-clause>?
     }
 
