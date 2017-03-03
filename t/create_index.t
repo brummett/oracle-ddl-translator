@@ -63,7 +63,7 @@ subtest 'index options' => {
 }
 
 subtest 'functional index' => {
-    plan 11;
+    plan 12;
 
     is $xlate.parse('CREATE INDEX foo.fi ON foo.table ( substr(col, 1), substr(col2, 2, 3) );'),
         "CREATE INDEX foo.fi ON foo.table ( substr( col, 1 ), substr( col2, 2, 3 ) );\n",
@@ -72,6 +72,10 @@ subtest 'functional index' => {
     is $xlate.parse(q{CREATE INDEX foo.decode ON foo.table ( DECODE(col, -1, col1, '2', col2, NULL) );}),
         "CREATE INDEX foo.decode ON foo.table ( ( CASE col WHEN -1 THEN col1 WHEN '2' THEN col2 ELSE NULL END ) );\n",
         'decode functional index';
+
+    is $xlate.parse(q{CREATE INDEX foo.decode ON foo.table ( DECODE(col, -1, col1, '2', col2));}),
+        "CREATE INDEX foo.decode ON foo.table ( ( CASE col WHEN -1 THEN col1 WHEN '2' THEN col2 END ) );\n",
+        'decode() without default case';
 
     is $xlate.parse(q :to<ORACLE> ),
         CREATE INDEX foo.bar ON foo.table

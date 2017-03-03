@@ -82,7 +82,8 @@ class TranslateOracleDDL::ToPostgres {
         }
         make "( CASE { $<topic>.made } "
                 ~ @cases.join(' ')
-                ~ " ELSE { $<default>.made } END )";
+                ~ ( $<default> ?? " ELSE { $<default>.made }" !! '' )
+                ~ ' END )';
     }
 
     method case-when-clause         ($/)    { make "WHEN { $<case>.made } THEN { $<then>.made }" }

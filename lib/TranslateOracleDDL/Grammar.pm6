@@ -65,7 +65,7 @@ grammar TranslateOracleDDL::Grammar {
     rule expr-comparison:sym<CASE>      { :ignorecase 'CASE' <when-clause=case-when-clause>* <else-clause>? 'END' }
     rule expr-comparison:sym<not-f>     { :ignorecase 'NOT' '(' <expr> ')' }
     rule expr-comparison:sym<substr-f>  { :ignorecase 'substr' '(' <expr>**2..3 % ',' ')' }
-    rule expr-comparison:sym<decode-f>  { :ignorecase 'decode' '(' <topic=expr> ',' [ [ <case=value> ',' <result=expr> ]+? % ',' ] ',' <default=expr> ')' }
+    rule expr-comparison:sym<decode-f>  { :ignorecase 'decode' '(' <topic=expr> ',' [ [ <case=value> ',' <result=expr> ]+? % ',' ] [ ',' <default=expr> ]? ')' }
     rule expr-comparison:sym<trunc-f>   { :ignorecase 'trunc' '(' <expr> ')' }
     rule expr-comparison:sym<to_char-f> { :ignorecase 'to_char' '(' <expr> ')' }
     rule expr-comparison:sym<upper-f>   { :ignorecase 'upper' '(' <expr> ')' }
