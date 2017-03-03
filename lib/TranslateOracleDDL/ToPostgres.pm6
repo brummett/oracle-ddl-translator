@@ -197,5 +197,12 @@ class TranslateOracleDDL::ToPostgres {
                 ~ " FROM { $<table-name>.made }"
                 ~ ( $<where-clause> ?? " { $<where-clause>.made }" !! '' );
     }
+
+    method sql-statement:sym<CREATE-VIEW> ($/) {
+        make "CREATE VIEW { $<view-name>.made } ( "
+            ~ @<columns>>>.made.join(', ')
+            ~ ' ) AS '
+            ~ $<select-statement>.made;
+    }
 }
 

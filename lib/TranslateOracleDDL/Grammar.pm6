@@ -191,6 +191,14 @@ grammar TranslateOracleDDL::Grammar {
 
     rule partition-clause { 'PARTITION' <identifier> VALUES LESS THAN '(' <expr> ')' }
 
+    rule sql-statement:sym<CREATE-VIEW> {
+        'CREATE' 'VIEW'
+        <view-name=entity-name>
+        '(' <columns=expr> + % ',' ')'
+        'AS'
+        <select-statement=sql-statement:sym<SELECT>>
+    }
+
     rule select-column { <expr> [ 'AS' <alias=identifier> ]? }
     rule sql-statement:sym<SELECT> {
         'SELECT'
