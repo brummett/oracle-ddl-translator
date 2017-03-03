@@ -201,8 +201,9 @@ grammar TranslateOracleDDL::Grammar {
         [ 'WITH' 'READ' 'ONLY']?
     }
 
-    rule select-column { <expr> [ 'AS' <alias=identifier> ]? }
+    rule select-column { <expr> [ 'AS'? <alias=identifier> <?{ $<identifier>.uc ne 'FROM' }>]? }
     rule sql-statement:sym<SELECT> {
+        :ignorecase
         'SELECT'
         <columns=select-column>+ % ','
         'FROM'
