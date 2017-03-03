@@ -193,8 +193,8 @@ class TranslateOracleDDL::ToPostgres {
         make @parts.join(' ');
     }
 
-    method select-column ($/) { make $<expr>.made ~ ( $<alias> ?? " AS $<alias>" !! '' ) }
-    method where-clause ($/)  { make "WHERE { $<expr>.made }" }
+    method select-column    ($/)    { make $<expr>.made ~ ( $<alias> ?? " AS $<alias>" !! '' ) }
+    method where-clause     ($/)    { make "WHERE { $<expr>.made }" }
     method select-from-table($/)    { make $<table-name>.made ~ ( $<alias> ?? " AS $<alias>" !! '') }
     method sql-statement:sym<SELECT> ($/) {
         make "SELECT { $<columns>>>.made.join(', ') }"
