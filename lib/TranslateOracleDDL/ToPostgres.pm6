@@ -199,7 +199,7 @@ class TranslateOracleDDL::ToPostgres {
     }
 
     method sql-statement:sym<CREATE-VIEW> ($/) {
-        make "CREATE VIEW { $<view-name>.made } ( "
+        make "$<create-or-replace>VIEW { $<view-name>.made } ( "
             ~ @<columns>>>.made.join(', ')
             ~ ' ) AS '
             ~ $<select-statement>.made;
