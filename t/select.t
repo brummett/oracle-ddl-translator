@@ -4,7 +4,7 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
-plan 4;
+plan 5;
 
 my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new);
 ok $xlate, 'created translator';
@@ -47,5 +47,14 @@ subtest 'WHERE clause' => {
     is $xlate.parse(q{SELECT col1 FROM foo.table WHERE col2=2;}),
         "SELECT col1 FROM foo.table WHERE col2 = 2;\n",
         'basic WHERE';
+
+}
+
+subtest 'join' => {
+    plan 1;
+
+    is $xlate.parse(q{SELECT schema.table1.col1, schema.table2.col2 FROM schema.table1, schema.table2;}),
+        "SELECT schema.table1.col1, schema.table2.col2 FROM schema.table1, schema.table2;\n",
+        'simple join';
 
 }

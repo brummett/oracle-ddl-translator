@@ -196,7 +196,7 @@ class TranslateOracleDDL::ToPostgres {
     method where-clause ($/)  { make "WHERE { $<expr>.made }" }
     method sql-statement:sym<SELECT> ($/) {
         make "SELECT { $<columns>>>.made.join(', ') }"
-                ~ " FROM { $<table-name>.made }"
+                ~ " FROM { @<table-name>>>.made.join(', ') }"
                 ~ ( $<where-clause> ?? " { $<where-clause>.made }" !! '' );
     }
 

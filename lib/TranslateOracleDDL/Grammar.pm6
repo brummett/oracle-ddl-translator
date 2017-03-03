@@ -207,7 +207,7 @@ grammar TranslateOracleDDL::Grammar {
         'SELECT'
         <columns=select-column>+ % ','
         'FROM'
-        <table-name=entity-name>
+        <table-name=entity-name> + % ','
         <where-clause>?
     }
 
