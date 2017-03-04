@@ -49,6 +49,7 @@ grammar TranslateOracleDDL::Grammar {
     token expr-operator:sym<eq>   { '=' }
     token expr-operator:sym<sub>  { '-' }
     token expr-operator:sym<add>  { '+' }
+    token expr-operator:sym<cat>  { '||' }
 
     token and-or-keyword                { :ignorecase 'and' | 'or' }
     proto rule expr { * }

@@ -74,7 +74,7 @@ subtest 'to_char' => {
 }
 
 subtest 'operators' => {
-    plan 3;
+    plan 4;
 
     is $xlate.parse('SELECT col-1000 FROM foo;'),
         "SELECT col - 1000 FROM foo;\n",
@@ -87,6 +87,10 @@ subtest 'operators' => {
     is $xlate.parse('SELECT col=1000 FROM foo;'),
         "SELECT col = 1000 FROM foo;\n",
         'equal';
+
+    is $xlate.parse(q{SELECT col||'1000' FROM foo;}),
+        "SELECT col || '1000' FROM foo;\n",
+        'string concat';
 }
 
 subtest 'CASE' => {
