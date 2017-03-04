@@ -71,6 +71,7 @@ grammar TranslateOracleDDL::Grammar {
     rule expr-comparison:sym<upper-f>   { :ignorecase 'upper' '(' <expr> ')' }
     rule expr-comparison:sym<lower-f>   { :ignorecase 'lower' '(' <expr> ')' }
     rule expr-comparison:sym<sign-f>    { :ignorecase 'sign' '(' <expr> ')' }
+    rule expr-comparison:sym<count-f>   { :ignorecase 'count' '(' <expr> ')' }
 
     proto token entity-type { * }
     token entity-type:sym<TABLE> { <sym> }
