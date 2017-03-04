@@ -126,7 +126,7 @@ subtest 'and/or' => {
 }
 
 subtest 'parens' => {
-    plan 2;
+    plan 3;
 
     is $xlate.parse(q{SELECT col FROM t WHERE (col1=1 and col2=2) or (col3=3 and col4=4) or (col5=5 and col6=6);}),
         "SELECT col FROM t WHERE ( col1 = 1 and col2 = 2 ) or ( col3 = 3 and col4 = 4 ) or ( col5 = 5 and col6 = 6 );\n",
@@ -135,6 +135,10 @@ subtest 'parens' => {
     is $xlate.parse(q{SELECT col FROM t WHERE (col1=1 and col2=2) or (col3=3 and col4=4) or (col5=5 and col6=6);}),
         "SELECT col FROM t WHERE ( col1 = 1 and col2 = 2 ) or ( col3 = 3 and col4 = 4 ) or ( col5 = 5 and col6 = 6 );\n",
         'multiple paren-exprs ANDed together';
+
+    is $xlate.parse(q{SELECT col FROM t WHERE ( col2=col3);}),
+        "SELECT col FROM t WHERE ( col2 = col3 );\n",
+        'single expr in parens';
 }
 
 subtest 'nested function calls' => {
