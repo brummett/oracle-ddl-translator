@@ -10,7 +10,7 @@ my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.
 ok $xlate, 'created translator';
 
 subtest 'NULL' => {
-    plan 2;
+    plan 3;
 
     is $xlate.parse('SELECT col IS NULL FROM foo;'),
         "SELECT col IS NULL FROM foo;\n",
@@ -19,6 +19,10 @@ subtest 'NULL' => {
     is $xlate.parse('SELECT col IS NOT NULL FROM foo;'),
         "SELECT col IS NOT NULL FROM foo;\n",
         'is not null';
+
+    is $xlate.parse('SELECT f.col IS NULL FROM foo f;'),
+        "SELECT f.col IS NULL FROM foo AS f;\n",
+        'NULL check accepts table.column';
 }
 
 subtest 'substr' => {
@@ -82,10 +86,14 @@ subtest 'CASE' => {
 }
 
 subtest 'IN' => {
-    plan 1;
+    plan 2;
 
     is $xlate.parse(q{SELECT col FROM t WHERE col IN (0,1);}),
         "SELECT col FROM t WHERE col IN ( 0, 1 );\n",
+        'basic';
+
+    is $xlate.parse(q{SELECT f.col FROM foo f WHERE col IN (0,1);}),
+        "SELECT f.col FROM foo AS f WHERE col IN ( 0, 1 );\n",
         'basic';
 }
 

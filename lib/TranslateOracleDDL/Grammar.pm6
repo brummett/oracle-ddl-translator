@@ -58,8 +58,8 @@ grammar TranslateOracleDDL::Grammar {
     rule expr:sym<atom>                 { <identifier-or-value> }
     proto rule expr-comparison          { * }
     rule expr-comparison:sym<operator>  { <identifier-or-value> <expr-operator> <identifier-or-value> }
-    rule expr-comparison:sym<NULL>      { :ignorecase <identifier> $<null-test-operator>=('IS' ['NOT']? 'NULL') }
-    rule expr-comparison:sym<IN>        { :ignorecase <identifier> 'IN' '(' [ <value> + % ',' ] ')' }
+    rule expr-comparison:sym<NULL>      { :ignorecase <entity-name> $<null-test-operator>=('IS' ['NOT']? 'NULL') }
+    rule expr-comparison:sym<IN>        { :ignorecase <entity-name> 'IN' '(' [ <value> + % ',' ] ')' }
         rule case-when-clause           { :ignorecase 'WHEN' <case=expr> 'THEN' <then=expr> }
         rule else-clause                { :ignorecase 'ELSE' <expr> }
     rule expr-comparison:sym<CASE>      { :ignorecase 'CASE' <when-clause=case-when-clause>* <else-clause>? 'END' }
