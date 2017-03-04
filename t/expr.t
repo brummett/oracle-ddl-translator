@@ -92,9 +92,9 @@ subtest 'IN' => {
         "SELECT col FROM t WHERE col IN ( 0, 1 );\n",
         'basic';
 
-    is $xlate.parse(q{SELECT f.col FROM foo f WHERE col IN (0,1);}),
-        "SELECT f.col FROM foo AS f WHERE col IN ( 0, 1 );\n",
-        'basic';
+    is $xlate.parse(q{SELECT f.col FROM foo f WHERE col IN (0,'1', 'hello');}),
+        "SELECT f.col FROM foo AS f WHERE col IN ( 0, '1', 'hello' );\n",
+        'with strings';
 }
 
 subtest 'and/or' => {
