@@ -213,7 +213,7 @@ grammar TranslateOracleDDL::Grammar {
 
     rule select-from-clause { <from=select-from-table> <alias=table-or-column-alias>? }
     proto rule select-from-table { * }
-    rule select-from-table:sym<name>        { <table-name=entity-name> }
+    token select-from-table:sym<name>        { <table-name=entity-name> [ '@' <dblink=identifier> ]? }
     rule select-from-table:sym<inline-view> { '(' <select-statement> ')' }
 
     rule sql-statement:sym<SELECT> { <select-statement> }

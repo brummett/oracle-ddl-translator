@@ -4,7 +4,7 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
-plan 9;
+plan 10;
 
 my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new);
 ok $xlate, 'created translator';
@@ -158,4 +158,16 @@ subtest 'group-by' => {
         "SELECT col1, col2, sum( value ) FROM t GROUP BY col1, col2;\n",
         'group by';
 
+}
+
+subtest 'db link' => {
+    plan 2;
+
+    is $xlate.parse('SELECT col FROM table@dw;'),
+        "SELECT col FROM table;\n",
+        'db link is dropped in FROM table';
+
+    is $xlate.parse('SELECT col FROM t JOIN other@oltp ON other.id = t.id;'),
+        "SELECT col FROM t JOIN other ON other.id = t.id;\n",
+        'db link is dropped from JOIN table';
 }
