@@ -115,7 +115,7 @@ subtest 'DISTINCT' => {
 }
 
 subtest 'inline view' => {
-    plan 1;
+    plan 3;
 
     is $xlate.parse(q :to<ORACLE>),
         SELECT col
@@ -126,4 +126,27 @@ subtest 'inline view' => {
         ORACLE
         "SELECT col FROM ( SELECT inner AS col FROM t );\n",
         'inline view';
+
+    is $xlate.parse(q :to<ORACLE>),
+        SELECT v.col
+        FROM (
+            SELECT inner AS col
+            FROM t
+        ) AS v;
+        ORACLE
+        "SELECT v.col FROM ( SELECT inner AS col FROM t ) AS v;\n",
+        'inline view with alias';
+
+    is $xlate.parse(q :to<ORACLE>),
+        SELECT v.col
+        FROM (
+            SELECT inner
+            FROM (
+                SELECT inner2
+                FROM inner_table
+            )
+        ) AS v;
+        ORACLE
+        "SELECT v.col FROM ( SELECT inner FROM ( SELECT inner2 FROM inner_table ) ) AS v;\n",
+        'nested inline view';
 }

@@ -202,7 +202,7 @@ grammar TranslateOracleDDL::Grammar {
         <view-name=entity-name>
         '(' <columns=expr> + % ',' ')'
         'AS'
-        <select-statement=sql-statement:sym<SELECT>>
+        <select-statement>
         [ 'WITH' 'READ' 'ONLY']?
     }
 
@@ -213,9 +213,10 @@ grammar TranslateOracleDDL::Grammar {
     rule select-from-clause { <from=select-from-table> <alias=table-or-column-alias>? }
     proto rule select-from-table { * }
     rule select-from-table:sym<name>        { <table-name=entity-name> }
-    rule select-from-table:sym<inline-view> { '(' <select-statement=sql-statement:sym<SELECT>> ')' }
+    rule select-from-table:sym<inline-view> { '(' <select-statement> ')' }
 
-    rule sql-statement:sym<SELECT> {
+    rule sql-statement:sym<SELECT> { <select-statement> }
+    rule select-statement {
         :ignorecase
         'SELECT'
         [ $<distinct>=('DISTINCT') ]?
