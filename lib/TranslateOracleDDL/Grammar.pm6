@@ -211,6 +211,7 @@ grammar TranslateOracleDDL::Grammar {
     rule sql-statement:sym<SELECT> {
         :ignorecase
         'SELECT'
+        [ $<distinct>=('DISTINCT') ]?
         <columns=select-column>+ % ','
         'FROM'
         <select-from-table> + % ','

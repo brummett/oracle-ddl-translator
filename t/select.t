@@ -4,7 +4,7 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
-plan 6;
+plan 7;
 
 my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new);
 ok $xlate, 'created translator';
@@ -96,4 +96,16 @@ subtest 'table AS clause' => {
     is $xlate.parse(q{SELECT t.col FROM table t;}),
         "SELECT t.col FROM table AS t;\n",
         'implied AS';
+}
+
+subtest 'DISTINCT' => {
+    plan 2;
+
+    is $xlate.parse(q{SELECT DISTINCT col FROM t;}),
+        "SELECT DISTINCT col FROM t;\n",
+        '1 column';
+
+    is $xlate.parse(q{SELECT DISTINCT col1, col2, col3 FROM t;}),
+        "SELECT DISTINCT col1, col2, col3 FROM t;\n",
+        'multiple columns';
 }

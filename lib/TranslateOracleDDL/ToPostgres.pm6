@@ -203,7 +203,9 @@ class TranslateOracleDDL::ToPostgres {
             ~ "JOIN { $<source>.made } ON { $<expr>.made }"
     }
     method sql-statement:sym<SELECT> ($/) {
-        make "SELECT { $<columns>>>.made.join(', ') }"
+        make 'SELECT '
+                ~ ( $<distinct> ?? 'DISTINCT ' !!  '' )
+                ~ $<columns>>>.made.join(', ')
                 ~ " FROM { @<select-from-table>>>.made.join(', ') }"
                 ~ ( @<join-clause>.elems ?? " { @<join-clause>>>.made.join(' ') }" !! '' )
                 ~ ( $<where-clause> ?? " { $<where-clause>.made }" !! '' );
