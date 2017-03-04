@@ -4,7 +4,7 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
-plan 11;
+plan 12;
 
 my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new);
 ok $xlate, 'created translator';
@@ -147,4 +147,12 @@ subtest 'nested function calls' => {
     is $xlate.parse('SELECT TO_CHAR(CASE WHEN col1 IS NOT NULL THEN col2 WHEN col1 = 1 THEN col3 ELSE col4 END) FROM foo;'),
         "SELECT to_char( CASE WHEN col1 IS NOT NULL THEN col2 WHEN col1 = 1 THEN col3 ELSE col4 END ) FROM foo;\n",
         'CASE inside to_char()';
+}
+
+subtest 'LIKE' => {
+    plan 1;
+
+    is $xlate.parse(q{SELECT col FROM foo WHERE col LIKE '%thing%';}),
+        "SELECT col FROM foo WHERE col LIKE '%thing%';\n",
+        'basic';
 }
