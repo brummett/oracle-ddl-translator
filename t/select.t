@@ -58,7 +58,7 @@ subtest 'WHERE clause' => {
 }
 
 subtest 'join' => {
-    plan 6;
+    plan 7;
 
     is $xlate.parse(q{SELECT schema.table1.col1, schema.table2.col2 FROM schema.table1, schema.table2;}),
         "SELECT schema.table1.col1, schema.table2.col2 FROM schema.table1, schema.table2;\n",
@@ -88,6 +88,10 @@ subtest 'join' => {
     is $xlate.parse('SELECT col FROM table LEFT OUTER JOIN other1 ON other1.id = table.id;'),
         "SELECT col FROM table LEFT OUTER JOIN other1 ON other1.id = table.id;\n",
         'left outer join';
+
+    is $xlate.parse('SELECT col FROM foo JOIN other ON other.id1 = foo.id1 AND other.id2 = foo.id2;'),
+        "SELECT col FROM foo JOIN other ON other.id1 = foo.id1 AND other.id2 = foo.id2;\n",
+        'JOIN with multiple conditions';
 }
 
 subtest 'table AS clause' => {
