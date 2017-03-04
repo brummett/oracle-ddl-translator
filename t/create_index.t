@@ -63,7 +63,7 @@ subtest 'index options' => {
 }
 
 subtest 'functional index' => {
-    plan 12;
+    plan 2;
 
     is $xlate.parse('CREATE INDEX foo.fi ON foo.table ( substr(col, 1), substr(col2, 2, 3) );'),
         "CREATE INDEX foo.fi ON foo.table ( substr( col, 1 ), substr( col2, 2, 3 ) );\n",
@@ -72,49 +72,4 @@ subtest 'functional index' => {
     is $xlate.parse(q{CREATE INDEX foo.decode ON foo.table ( DECODE(col, -1, col1, '2', col2, NULL) );}),
         "CREATE INDEX foo.decode ON foo.table ( ( CASE col WHEN -1 THEN col1 WHEN '2' THEN col2 ELSE NULL END ) );\n",
         'decode functional index';
-
-    is $xlate.parse(q{CREATE INDEX foo.decode ON foo.table ( DECODE(col, -1, col1, '2', col2));}),
-        "CREATE INDEX foo.decode ON foo.table ( ( CASE col WHEN -1 THEN col1 WHEN '2' THEN col2 END ) );\n",
-        'decode() without default case';
-
-    is $xlate.parse(q :to<ORACLE> ),
-        CREATE INDEX foo.bar ON foo.table
-            (
-                SUBSTR(DECODE(ANALYSIS_APPROVAL,1,FLOW_CELL_ID,NULL),1,16)
-            );
-        ORACLE
-        "CREATE INDEX foo.bar ON foo.table ( substr( ( CASE ANALYSIS_APPROVAL WHEN 1 THEN FLOW_CELL_ID ELSE NULL END ), 1, 16 ) );\n",
-        'real example with nested function calls';
-
-    is $xlate.parse('CREATE INDEX foo.idx ON foo.table ( TRUNC(column_name) );'),
-        "CREATE INDEX foo.idx ON foo.table ( trunc( column_name ) );\n",
-        'trunc function';
-
-    is $xlate.parse('CREATE INDEX foo.idx ON foo.table ( TO_CHAR(column_name) );'),
-        "CREATE INDEX foo.idx ON foo.table ( to_char( column_name ) );\n",
-        'to_char function';
-
-    is $xlate.parse('CREATE INDEX foo.idx ON foo.table ( TO_CHAR(CASE WHEN col1 IS NOT NULL THEN col2 WHEN col1 = 1 THEN col3 ELSE col4 END));'),
-        "CREATE INDEX foo.idx ON foo.table ( to_char( CASE WHEN col1 IS NOT NULL THEN col2 WHEN col1 = 1 THEN col3 ELSE col4 END ) );\n",
-        'CASE inside to_char()';
-
-    is $xlate.parse('CREATE INDEX foo.upper ON foo.table ( UPPER(BARCODE) );'),
-        "CREATE INDEX foo.upper ON foo.table ( upper( BARCODE ) );\n",
-        'upper function';
-
-    is $xlate.parse('CREATE INDEX foo.lower ON foo.table ( LOWER(BARCODE) );'),
-        "CREATE INDEX foo.lower ON foo.table ( lower( BARCODE ) );\n",
-        'lower function';
-
-    is $xlate.parse('CREATE INDEX foo.sign ON foo.table ( sign(col) );'),
-        "CREATE INDEX foo.sign ON foo.table ( sign( col ) );\n",
-        'sign function';
-
-    is $xlate.parse('CREATE INDEX foo.sub ON foo.table ( col-1000 );'),
-        "CREATE INDEX foo.sub ON foo.table ( col - 1000 );\n",
-        'subtraction operator';
-
-    is $xlate.parse('CREATE INDEX foo.sub ON foo.table ( col+1000 );'),
-        "CREATE INDEX foo.sub ON foo.table ( col + 1000 );\n",
-        'addition operator';
 }

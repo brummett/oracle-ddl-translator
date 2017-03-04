@@ -60,7 +60,7 @@ subtest 'UNIQUE' => {
 }
 
 subtest 'CHECK' => {
-    plan 10;
+    plan 3;
 
     is $xlate.parse('ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ("col_name" IS NOT NULL);'),
         qq{ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ( "col_name" IS NOT NULL );\n},
@@ -73,34 +73,6 @@ subtest 'CHECK' => {
     is $xlate.parse('ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK (col_name=1);'),
         "ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ( col_name = 1 );\n",
         'column value = 1';
-
-    is $xlate.parse('ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK (NOT(col_name=1));'),
-        "ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ( NOT( col_name = 1 ) );\n",
-        'NOT column value = 1';
-
-    is $xlate.parse('ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK (col_name in (0,1));'),
-        "ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ( col_name IN ( 0, 1 ) );\n",
-        'column IN list';
-
-    is $xlate.parse('ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK (col_name=1 and col2=3);'),
-        "ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ( col_name = 1 and col2 = 3 );\n",
-        'AND 2 simple expressions';
-
-    is $xlate.parse('ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK (col_name=1 or col2=3);'),
-        "ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ( col_name = 1 or col2 = 3 );\n",
-        'OR 2 simple expressions';
-
-    is $xlate.parse('ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ((col1=1 and col2=2) or (col3=3 and col4=4));'),
-        "ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ( ( col1 = 1 and col2 = 2 ) or ( col3 = 3 and col4 = 4 ) );\n",
-        'OR 2 ANDed exprs';
-
-    is $xlate.parse('ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ((col1=1 or col2=2) and (col3=3 or col4=4));'),
-        "ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ( ( col1 = 1 or col2 = 2 ) and ( col3 = 3 or col4 = 4 ) );\n",
-        'AND 2 ORed exprs';
-
-    is $xlate.parse('ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ((col1=1 AND col2=2) OR (col3=3 and col4=4) or (col5=5 and col6=6));'),
-        "ALTER TABLE foo.check ADD CONSTRAINT ck_constr CHECK ( ( col1 = 1 AND col2 = 2 ) OR ( col3 = 3 and col4 = 4 ) or ( col5 = 5 and col6 = 6 ) );\n",
-        'OR 2 ANDed exprs';
 }
 
 subtest 'FOREIGN KEY' => {
