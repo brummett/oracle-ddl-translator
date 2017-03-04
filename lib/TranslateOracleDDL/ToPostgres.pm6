@@ -164,8 +164,8 @@ class TranslateOracleDDL::ToPostgres {
 
     method table-constraint-def ($/)        {
         my @parts = ('CONSTRAINT', $<identifier>, $<table-constraint>.made);
-        if @<constraint-deferrables>.elems {
-            @parts.push: @<constraint-deferrables>>>.made.grep({ $_ });
+        if @<constraint-options>.elems {
+            @parts.push: @<constraint-options>>>.made.grep({ $_ });
         }
         make @parts.join(' ');
     }
@@ -177,17 +177,24 @@ class TranslateOracleDDL::ToPostgres {
         make "FOREIGN KEY ( { @<table-columns>.join(', ') } ) REFERENCES { $<entity-name>.made } ( { @<fk-columns>.join(', ') } )";
     }
 
-    method constraint-deferrables:sym<DEFERRABLE> ($/) { make $/ }
-    method constraint-deferrables:sym<INITIALLY> ($/)  { make $/ }
+    method constraint-options:sym<DEFERRABLE> ($/) { make $/ }
+    method constraint-options:sym<INITIALLY> ($/)  { make $/ }
+    method constraint-options:sym<DISABLE> ($/)    { make Str }
 
     method sql-statement:sym<ALTER-TABLE> ($/) {
-        make 'ALTER TABLE ' ~ $<entity-name>.made ~ ' ' ~ $<alter-table-action>.made;
+        if ($<alter-table-action><alter-table-action-add>
+            && $<alter-table-action><alter-table-action-add><table-constraint-def>
+            && $<alter-table-action><alter-table-action-add><table-constraint-def><constraint-options>.contains('DISABLE')
+        ) {
+            make Str;  # Postgres doesn't support disabled constraints, remove them
+        } else {
+            make 'ALTER TABLE ' ~ $<entity-name>.made ~ ' ' ~ $<alter-table-action>.made;
+        }
     }
-    method sql-statement:sym<ALTER-TABLE-ADD-CONSTRAINT-DISABLE> ($/) { make Str }
+    method sql-statement:sym<ALTER-TABLE-BROKEN-CONSTRAINT> ($/) { make Str }
 
     method alter-table-action:sym<ADD> ($/)             { make 'ADD ' ~ $<alter-table-action-add>.made }
     method alter-table-action-add:sym<CONSTRAINT> ($/)  { make $<table-constraint-def>.made }
-
 
     method index-option:sym<COMPRESS> ($/) { make Str }
     method index-option:sym<GLOBAL-PARTITION> ($/) { make Str }
