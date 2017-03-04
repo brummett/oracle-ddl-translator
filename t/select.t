@@ -42,12 +42,15 @@ subtest 'column AS clause' => {
 }
 
 subtest 'WHERE clause' => {
-    plan 1;
+    plan 2;
 
     is $xlate.parse(q{SELECT col1 FROM foo.table WHERE col2=2;}),
         "SELECT col1 FROM foo.table WHERE col2 = 2;\n",
         'basic WHERE';
 
+    is $xlate.parse(q{SELECT col1 FROM foo.t WHERE col1=1 and col2=2 AND col3=3;}),
+        "SELECT col1 FROM foo.t WHERE col1 = 1 and col2 = 2 AND col3 = 3;\n",
+        'WHERE with composite expr';
 }
 
 subtest 'join' => {
