@@ -4,7 +4,7 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
-plan 12;
+plan 13;
 
 my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new);
 ok $xlate, 'created translator';
@@ -50,7 +50,7 @@ subtest 'decode' => {
 }
 
 subtest 'urnary functions' => {
-    my @tests = <trunc to_char upper lower sign count sum>;
+    my @tests = <trunc upper lower sign count sum>;
     plan @tests.elems;
 
     for @tests -> $func {
@@ -59,6 +59,18 @@ subtest 'urnary functions' => {
             "$sql\n",
             "$func\(\)";
     }
+}
+
+subtest 'to_char' => {
+    plan 2;
+
+    is $xlate.parse('SELECT to_char(col) FROM foo;'),
+        "SELECT to_char( col ) FROM foo;\n",
+        '1-arg';
+
+    is $xlate.parse(q{SELECT to_char(date, 'MM/DD/YYYY') FROM foo;}),
+        "SELECT to_char( date, 'MM/DD/YYYY' ) FROM foo;\n",
+        '2-arg';
 }
 
 subtest 'operators' => {

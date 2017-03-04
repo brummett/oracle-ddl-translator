@@ -68,7 +68,7 @@ grammar TranslateOracleDDL::Grammar {
     rule expr-comparison:sym<substr-f>  { :ignorecase 'substr' '(' <expr>**2..3 % ',' ')' }
     rule expr-comparison:sym<decode-f>  { :ignorecase 'decode' '(' <topic=expr> ',' [ [ <case=value> ',' <result=expr> ]+? % ',' ] [ ',' <default=expr> ]? ')' }
     rule expr-comparison:sym<trunc-f>   { :ignorecase 'trunc' '(' <expr> ')' }
-    rule expr-comparison:sym<to_char-f> { :ignorecase 'to_char' '(' <expr> ')' }
+    rule expr-comparison:sym<to_char-f> { :ignorecase 'to_char' '(' <expr>**1..2 % ',' ')' }   # Maybe parse the format specially?
     rule expr-comparison:sym<upper-f>   { :ignorecase 'upper' '(' <expr> ')' }
     rule expr-comparison:sym<lower-f>   { :ignorecase 'lower' '(' <expr> ')' }
     rule expr-comparison:sym<sign-f>    { :ignorecase 'sign' '(' <expr> ')' }
