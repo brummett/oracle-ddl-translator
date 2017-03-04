@@ -205,7 +205,7 @@ grammar TranslateOracleDDL::Grammar {
         [ 'WITH' 'READ' 'ONLY']?
     }
 
-    my $illegal-as-alias = 'FROM' | 'WHERE' | 'WITH';
+    my $illegal-as-alias = 'FROM' | 'WHERE' | 'WITH' | 'JOIN';
     rule select-column { :ignorecase <expr> [ 'AS'? <alias=identifier> <?{ $<alias>.uc ne $illegal-as-alias }>]? }
     rule select-from-table { <table-name=entity-name> [ 'AS'? <alias=identifier> <?{ $<alias>.uc ne $illegal-as-alias }>]? }
     rule sql-statement:sym<SELECT> {
@@ -214,9 +214,15 @@ grammar TranslateOracleDDL::Grammar {
         <columns=select-column>+ % ','
         'FROM'
         <select-from-table> + % ','
+        <join-clause>*
         <where-clause>?
     }
 
     rule where-clause { 'WHERE' <expr> }
+    rule join-clause {
+        :ignorecase
+        'JOIN' <source=select-from-table>
+        'ON' <expr>
+    }
 }
 
