@@ -133,7 +133,7 @@ grammar TranslateOracleDDL::Grammar {
     rule create-table-column-constraint:sym<PRIMARY-KEY> { 'PRIMARY KEY' }
     rule create-table-column-constraint:sym<DEFAULT> { 'DEFAULT' <value> }
 
-    rule table-constraint-def { 'CONSTRAINT' <identifier> <table-constraint> <constraint-deferrables> * }
+    rule table-constraint-def { 'CONSTRAINT' <identifier> <table-constraint> <constraint-options> * }
 
     proto rule table-constraint { * }
     rule table-constraint:sym<PRIMARY-KEY> { 'PRIMARY' 'KEY' '(' [ <identifier> + % ',' ] ')' }
@@ -146,17 +146,19 @@ grammar TranslateOracleDDL::Grammar {
         '(' [ <fk-columns=identifier> + % ',' ] ')'
     }
 
-    proto token constraint-deferrables { * }
-    token constraint-deferrables:sym<DEFERRABLE> { ['NOT' <ws>]? 'DEFERRABLE' }
-    token constraint-deferrables:sym<INITIALLY>  { 'INITIALLY' <ws> ['IMMEDIATE'|'DEFERRED'] }
-    token constraint-deferrables:sym<ENABLE-NOVALIDATE> { 'ENABLE' <ws> 'NOVALIDATE' }    # Postgres doesn't handle this
+    proto token constraint-options { * }
+    token constraint-options:sym<DEFERRABLE> { ['NOT' <ws>]? 'DEFERRABLE' }
+    token constraint-options:sym<INITIALLY>  { 'INITIALLY' <ws> ['IMMEDIATE'|'DEFERRED'] }
+    token constraint-options:sym<ENABLE-NOVALIDATE> { 'ENABLE' <ws> 'NOVALIDATE' }    # Postgres doesn't handle this
+    token constraint-options:sym<DISABLE>    { 'DISABLE' }
 
-    rule sql-statement:sym<ALTER-TABLE-ADD-CONSTRAINT-DISABLE> {
+    rule sql-statement:sym<ALTER-TABLE-BROKEN-CONSTRAINT> {
         'ALTER' 'TABLE'
         \S+
         'ADD' 'CONSTRAINT'
-        .*?
-        'DISABLE'
+        \S+
+        'CHECK' '(' ')' '(' ')'
+        \w+ 'DISABLE'
     }
     rule sql-statement:sym<ALTER-TABLE> {
         'ALTER' 'TABLE'
