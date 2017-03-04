@@ -46,7 +46,7 @@ subtest 'decode' => {
 }
 
 subtest 'urnary functions' => {
-    my @tests = <trunc to_char upper lower sign count>;
+    my @tests = <trunc to_char upper lower sign count sum>;
     plan @tests.elems;
 
     for @tests -> $func {
