@@ -4,7 +4,7 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
-plan 7;
+plan 8;
 
 my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new);
 ok $xlate, 'created translator';
@@ -112,4 +112,18 @@ subtest 'DISTINCT' => {
     is $xlate.parse(q{SELECT DISTINCT col1, col2, col3 FROM t;}),
         "SELECT DISTINCT col1, col2, col3 FROM t;\n",
         'multiple columns';
+}
+
+subtest 'inline view' => {
+    plan 1;
+
+    is $xlate.parse(q :to<ORACLE>),
+        SELECT col
+        FROM (
+            SELECT inner AS col
+            FROM t
+        );
+        ORACLE
+        "SELECT col FROM ( SELECT inner AS col FROM t );\n",
+        'inline view';
 }

@@ -195,9 +195,11 @@ class TranslateOracleDDL::ToPostgres {
     }
 
     method table-or-column-alias    ($/) { make "AS $<alias>" }
-    method select-column            ($/) { make $<expr>.made       ~ ( $<alias> ?? " { $<alias>.made }" !! '' ) }
-    method select-from-table        ($/) { make $<table-name>.made ~ ( $<alias> ?? " { $<alias>.made }" !! '' ) }
     method where-clause             ($/) { make "WHERE { $<expr>.made }" }
+    method select-column            ($/) { make $<expr>.made ~ ( $<alias> ?? " { $<alias>.made }" !! '' ) }
+    method select-from-clause       ($/) { make $<from>.made ~ ( $<alias> ?? " { $<alias>.made }" !! '' ) }
+    method select-from-table:sym<name>          ($/) { make $<table-name>.made }
+    method select-from-table:sym<inline-view>   ($/) { make "( { $<select-statement>.made } )" }
 
     method join-clause      ($/)    {
         make
@@ -209,7 +211,7 @@ class TranslateOracleDDL::ToPostgres {
         make 'SELECT '
                 ~ ( $<distinct> ?? 'DISTINCT ' !!  '' )
                 ~ $<columns>>>.made.join(', ')
-                ~ " FROM { @<select-from-table>>>.made.join(', ') }"
+                ~ " FROM { @<select-from-clause>>>.made.join(', ') }"
                 ~ ( @<join-clause>.elems ?? " { @<join-clause>>>.made.join(' ') }" !! '' )
                 ~ ( $<where-clause> ?? " { $<where-clause>.made }" !! '' );
     }

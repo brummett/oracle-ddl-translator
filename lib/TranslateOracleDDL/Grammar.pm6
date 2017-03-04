@@ -209,7 +209,11 @@ grammar TranslateOracleDDL::Grammar {
     my $illegal-as-alias = 'FROM' | 'WHERE' | 'WITH' | 'JOIN' | 'LEFT' | 'OUTER' | 'ON';
     rule table-or-column-alias { :ignorecase [ 'AS'? <alias=identifier> <?{ $<alias>.uc ne $illegal-as-alias }>] }
     rule select-column { <expr> <alias=table-or-column-alias>? }
-    rule select-from-table { <table-name=entity-name> <alias=table-or-column-alias>? }
+
+    rule select-from-clause { <from=select-from-table> <alias=table-or-column-alias>? }
+    proto rule select-from-table { * }
+    rule select-from-table:sym<name>        { <table-name=entity-name> }
+    rule select-from-table:sym<inline-view> { '(' <select-statement=sql-statement:sym<SELECT>> ')' }
 
     rule sql-statement:sym<SELECT> {
         :ignorecase
@@ -217,7 +221,7 @@ grammar TranslateOracleDDL::Grammar {
         [ $<distinct>=('DISTINCT') ]?
         <columns=select-column>+ % ','
         'FROM'
-        <select-from-table> + % ','
+        <select-from-clause> + % ','
         <join-clause>*
         <where-clause>?
     }
@@ -227,7 +231,7 @@ grammar TranslateOracleDDL::Grammar {
         :ignorecase
         [ $<left>=('LEFT') ]?
         [ $<outer>=('OUTER') ]?
-        'JOIN' <source=select-from-table>
+        'JOIN' <source=select-from-clause>
         'ON' <expr>
     }
 }
