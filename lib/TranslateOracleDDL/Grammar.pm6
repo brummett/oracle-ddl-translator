@@ -11,7 +11,7 @@ grammar TranslateOracleDDL::Grammar {
 
     proto rule input-line { * }
     rule input-line:sym<sqlplus-directive> { <sqlplus-directive> }
-    rule input-line:sym<sql-statement> { <sql-statement> ';' }
+    rule input-line:sym<sql-statement> { <sql-statement> \0* ';' }
 
     proto rule sqlplus-directive { * }
     rule sqlplus-directive:sym<REM>     { ['REM'<?before \v>]    | ['REM'<string-to-end-of-line>] } 

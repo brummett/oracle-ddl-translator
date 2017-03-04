@@ -10,7 +10,7 @@ my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.
 ok $xlate, 'created translator';
 
 subtest 'basic' => {
-    plan 3;
+    plan 4;
 
     is $xlate.parse( q :to<ORACLE> ),
         SELECT col1,
@@ -27,6 +27,10 @@ subtest 'basic' => {
     is $xlate.parse(q{SELECT "col" from foo.table;}),
         qq{SELECT "col" FROM foo.table;\n},
         'case-insensitive';
+
+    is $xlate.parse(qq"SELECT col from foo\0;"),
+        "SELECT col FROM foo;\n",
+        'null chars are dropped';
 }
 
 subtest 'column AS clause' => {
