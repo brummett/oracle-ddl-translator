@@ -207,8 +207,10 @@ grammar TranslateOracleDDL::Grammar {
     }
 
     my $illegal-as-alias = 'FROM' | 'WHERE' | 'WITH' | 'JOIN' | 'LEFT' | 'OUTER' | 'ON';
-    rule select-column { :ignorecase <expr> [ 'AS'? <alias=identifier> <?{ $<alias>.uc ne $illegal-as-alias }>]? }
-    rule select-from-table { <table-name=entity-name> [ 'AS'? <alias=identifier> <?{ $<alias>.uc ne $illegal-as-alias }>]? }
+    rule table-or-column-alias { :ignorecase [ 'AS'? <alias=identifier> <?{ $<alias>.uc ne $illegal-as-alias }>] }
+    rule select-column { <expr> <alias=table-or-column-alias>? }
+    rule select-from-table { <table-name=entity-name> <alias=table-or-column-alias>? }
+
     rule sql-statement:sym<SELECT> {
         :ignorecase
         'SELECT'
