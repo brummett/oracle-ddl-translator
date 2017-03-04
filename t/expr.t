@@ -46,27 +46,15 @@ subtest 'decode' => {
 }
 
 subtest 'urnary functions' => {
-    plan 5;
+    my @tests = <trunc to_char upper lower sign>;
+    plan @tests.elems;
 
-    is $xlate.parse(q{SELECT TRUNC(col) FROM foo;}),
-        "SELECT trunc( col ) FROM foo;\n",
-        'trunc()';
-
-    is $xlate.parse(q{SELECT to_char(col) from foo;}),
-        "SELECT to_char( col ) FROM foo;\n",
-        'to_char()';
-
-    is $xlate.parse(q{SELECT upper(col) FROM foo;}),
-        "SELECT upper( col ) FROM foo;\n",
-        'upper()';
-
-    is $xlate.parse(q{SELECT lower(col) FROM foo;}),
-        "SELECT lower( col ) FROM foo;\n",
-        'lower()';
-
-    is $xlate.parse(q{SELECT sign(col) FROM foo;}),
-        "SELECT sign( col ) FROM foo;\n",
-        'sign()';
+    for @tests -> $func {
+        my $sql = 'SELECT %s( col ) FROM foo;'.sprintf($func);
+        is $xlate.parse($sql),
+            "$sql\n",
+            "$func\(\)";
+    }
 }
 
 subtest 'operators' => {
