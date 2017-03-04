@@ -4,7 +4,7 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
-plan 8;
+plan 9;
 
 my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new);
 ok $xlate, 'created translator';
@@ -149,4 +149,13 @@ subtest 'inline view' => {
         ORACLE
         "SELECT v.col FROM ( SELECT inner FROM ( SELECT inner2 FROM inner_table ) ) AS v;\n",
         'nested inline view';
+}
+
+subtest 'group-by' => {
+    plan 1;
+
+    is $xlate.parse('SELECT col1, col2, sum(value) FROM t GROUP BY col1, col2;'),
+        "SELECT col1, col2, sum( value ) FROM t GROUP BY col1, col2;\n",
+        'group by';
+
 }

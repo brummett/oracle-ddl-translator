@@ -207,7 +207,7 @@ grammar TranslateOracleDDL::Grammar {
         [ 'WITH' 'READ' 'ONLY']?
     }
 
-    my $illegal-as-alias = 'FROM' | 'WHERE' | 'WITH' | 'JOIN' | 'LEFT' | 'OUTER' | 'ON';
+    my $illegal-as-alias = 'FROM' | 'WHERE' | 'WITH' | 'JOIN' | 'LEFT' | 'OUTER' | 'ON' | 'GROUP';
     rule table-or-column-alias { :ignorecase [ 'AS'? <alias=identifier> <?{ $<alias>.uc ne $illegal-as-alias }>] }
     rule select-column { <expr> <alias=table-or-column-alias>? }
 
@@ -226,9 +226,11 @@ grammar TranslateOracleDDL::Grammar {
         <select-from-clause> + % ','
         <join-clause>*
         <where-clause>?
+        <group-by-clause>?
     }
 
-    rule where-clause { 'WHERE' <expr> }
+    rule where-clause { :ignorecase 'WHERE' <expr> }
+    rule group-by-clause { :ignorecase 'GROUP' 'BY' <identifier> + % ',' }
     rule join-clause {
         :ignorecase
         [ $<left>=('LEFT') ]?

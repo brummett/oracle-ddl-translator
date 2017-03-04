@@ -197,6 +197,7 @@ class TranslateOracleDDL::ToPostgres {
 
     method table-or-column-alias    ($/) { make "AS $<alias>" }
     method where-clause             ($/) { make "WHERE { $<expr>.made }" }
+    method group-by-clause          ($/) { make "GROUP BY { @<identifier>.join(', ') }" }
     method select-column            ($/) { make $<expr>.made ~ ( $<alias> ?? " { $<alias>.made }" !! '' ) }
     method select-from-clause       ($/) { make $<from>.made ~ ( $<alias> ?? " { $<alias>.made }" !! '' ) }
     method select-from-table:sym<name>          ($/) { make $<table-name>.made }
@@ -216,7 +217,8 @@ class TranslateOracleDDL::ToPostgres {
                 ~ $<columns>>>.made.join(', ')
                 ~ " FROM { @<select-from-clause>>>.made.join(', ') }"
                 ~ ( @<join-clause>.elems ?? " { @<join-clause>>>.made.join(' ') }" !! '' )
-                ~ ( $<where-clause> ?? " { $<where-clause>.made }" !! '' );
+                ~ ( $<where-clause> ?? " { $<where-clause>.made }" !! '' )
+                ~ ( $<group-by-clause> ?? " { $<group-by-clause>.made }" !! '' );
     }
 
     method sql-statement:sym<CREATE-VIEW> ($/) {
