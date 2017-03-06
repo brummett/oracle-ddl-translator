@@ -1,7 +1,17 @@
 use v6;
 
 grammar TranslateOracleDDL::Grammar {
+    my Str $last-statement-type;
+    my Str $last-element-name;
+    my Int $last-pos;
+
+    method last-parse-location {
+        "Last parsed { $last-statement-type } on { $last-element-name } at { $last-pos }";
+    }
+
     rule TOP {
+        { $last-statement-type = $last-element-name = ''; $last-pos = 0; }
+
         <input-line>+
     }
 
@@ -82,11 +92,19 @@ grammar TranslateOracleDDL::Grammar {
 
     proto rule sql-statement { * }
     rule sql-statement:sym<COMMENT-ON> {
-        'COMMENT' 'ON' <entity-type> <entity-name> 'IS' <value>
+        'COMMENT' 'ON'
+            { $last-statement-type = 'COMMENT ON'; $last-pos = self.pos }
+        <entity-type> <entity-name>
+            { $last-element-name = ~$<entity-name> }
+        'IS' <value>
     }
 
     rule sql-statement:sym<CREATE-SEQUENCE> {
-        'CREATE' 'SEQUENCE' <entity-name> <create-sequence-clause>*
+        'CREATE' 'SEQUENCE'
+            { $last-statement-type = 'CREATE SEQUENCE'; $last-pos = self.pos }
+        <entity-name>
+            { $last-element-name = ~$<entity-name> }
+        <create-sequence-clause>*
     }
 
     proto rule create-sequence-clause { * }
@@ -105,7 +123,9 @@ grammar TranslateOracleDDL::Grammar {
 
     rule sql-statement:sym<CREATE-TABLE> {
         'CREATE TABLE'
+            { $last-statement-type = 'CREATE TABLE'; $last-pos = self.pos }
         <entity-name>
+            { $last-element-name = ~$<element-name> }
         '('
             <create-table-column-def>+? % ','
             [ ',' <table-constraint-def> ]*
@@ -167,10 +187,13 @@ grammar TranslateOracleDDL::Grammar {
         \S+
         'CHECK' '(' ')' '(' ')'
         \w+ 'DISABLE'
+            { $last-statement-type = 'broken ALTER TABLE ... ADD CONSTRAINT'; $last-element-name = ''; $last-pos = self.pos }
     }
     rule sql-statement:sym<ALTER-TABLE> {
         'ALTER' 'TABLE'
+            { $last-statement-type = 'ALTER TABLE'; $last-pos = self.pos }
         <entity-name>
+            { $last-element-name = ~$<entity-name> }
         <alter-table-action>
     }
 
@@ -183,7 +206,9 @@ grammar TranslateOracleDDL::Grammar {
     token unique-keyword { 'UNIQUE' }
     rule sql-statement:sym<CREATE-INDEX> {
         'CREATE' <unique=unique-keyword>? 'INDEX'
+            { $last-statement-type = 'CREATE [unique] INDEX'; $last-pos = self.pos }
         <index-name=entity-name>
+            { $last-element-name = ~$<index-name> }
         'ON'
         <table-name=entity-name>
         '(' [ [ <columns=expr> ]+ % ',' ] ')'
@@ -202,7 +227,9 @@ grammar TranslateOracleDDL::Grammar {
     rule create-or-replace { 'CREATE' ['OR' 'REPLACE']? }
     rule sql-statement:sym<CREATE-VIEW> {
         <create-or-replace> 'VIEW'
+            { $last-statement-type = 'CREATE [or replace] VIEW'; $last-pos = self.pos }
         <view-name=entity-name>
+            { $last-element-name = ~$<view-name> }
         '(' <columns=expr> + % ',' ')'
         'AS'
         <select-statement>
