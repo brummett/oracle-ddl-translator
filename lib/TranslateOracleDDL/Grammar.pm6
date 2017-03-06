@@ -58,7 +58,7 @@ grammar TranslateOracleDDL::Grammar {
     rule expr:sym<simple>               { <expr-comparison> }
     rule expr:sym<atom>                 { <identifier-or-value> }
     proto rule expr-comparison          { * }
-    rule expr-comparison:sym<operator>  { <identifier-or-value> <expr-operator> <identifier-or-value> }
+    rule expr-comparison:sym<operator>  { <left=identifier-or-value> <expr-operator> <right=expr> }
     rule expr-comparison:sym<NULL>      { :ignorecase <entity-name> $<null-test-operator>=('IS' ['NOT']? 'NULL') }
     rule expr-comparison:sym<LIKE>      { :ignorecase <entity-name> 'LIKE' <expr> }
     rule expr-comparison:sym<IN>        { :ignorecase <entity-name> 'IN' '(' [ <value> + % ',' ] ')' }
