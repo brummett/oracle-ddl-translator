@@ -224,6 +224,10 @@ grammar TranslateOracleDDL::Grammar {
 
     rule partition-clause { 'PARTITION' <identifier> VALUES LESS THAN '(' <expr> ')' }
 
+    rule sql-statement:sym<special-CREATE-VIEW> {
+        'CREATE' 'OR' 'REPLACE' 'VIEW' 'SCHEMA_USER.plate_locations' '(' <-[;]>+
+    }
+
     rule create-or-replace { 'CREATE' ['OR' 'REPLACE']? }
     rule sql-statement:sym<CREATE-VIEW> {
         <create-or-replace> 'VIEW'

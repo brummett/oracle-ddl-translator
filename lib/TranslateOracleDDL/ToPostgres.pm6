@@ -228,5 +228,9 @@ class TranslateOracleDDL::ToPostgres {
             ~ ' ) AS '
             ~ $<select-statement>.made;
     }
+
+    method sql-statement:sym<special-CREATE-VIEW> ($/) {
+        make ~$/;
+    }
 }
 
