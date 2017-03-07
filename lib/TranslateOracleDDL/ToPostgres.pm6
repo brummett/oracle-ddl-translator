@@ -196,6 +196,8 @@ class TranslateOracleDDL::ToPostgres {
         make @parts.join(' ');
     }
 
+    method sql-statement:sym<broken-CREATE-INDEX> ($/) { make Str }
+
     method table-or-column-alias    ($/) { make "AS $<alias>" }
     method where-clause             ($/) { make "WHERE { $<expr>.made }" }
     method group-by-clause          ($/) { make "GROUP BY { @<identifier>.join(', ') }" }

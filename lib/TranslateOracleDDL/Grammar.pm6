@@ -214,6 +214,16 @@ grammar TranslateOracleDDL::Grammar {
         '(' [ [ <columns=expr> ]+ % ',' ] ')'
         <index-option>*
     }
+    rule sql-statement:sym<broken-CREATE-INDEX> {
+        'CREATE' <unique=unique-keyword>? 'INDEX'
+            { $last-statement-type = 'CREATE [unique] INDEX'; $last-pos = self.pos }
+        <index-name=entity-name>
+            { $last-element-name = ~$<index-name> }
+        'ON'
+        <table-name=entity-name>
+        '(' [ [ <columns=expr> ]* %% ',' ]
+    }
+
     proto rule index-option { * }
     rule index-option:sym<COMPRESS> { 'COMPRESS' \d+ }
     rule index-option:sym<GLOBAL-PARTITION> {
