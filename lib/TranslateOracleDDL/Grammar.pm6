@@ -125,7 +125,7 @@ grammar TranslateOracleDDL::Grammar {
         'CREATE TABLE'
             { $last-statement-type = 'CREATE TABLE'; $last-pos = self.pos }
         <entity-name>
-            { $last-element-name = ~$<element-name> }
+            { $last-element-name = ~$<entity-name>.made }
         '('
             <create-table-column-def>+? % ','
             [ ',' <table-constraint-def> ]*
