@@ -12,5 +12,11 @@ class TranslateOracleDDL {
         die "Didn't parse: { $!grammar.last-parse-location }" unless $parsed;
         return $parsed.made;
     }
+
+    method parsefile(Str $filename) returns Str {
+        my $parsed = $!grammar.parsefile($filename, actions => $!translator);
+        die "Didn't parse: { $!grammar.last-parse-location }" unless $parsed;
+        return $parsed.made;
+    }
 }
 
