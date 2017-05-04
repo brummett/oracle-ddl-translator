@@ -190,7 +190,9 @@ class TranslateOracleDDL::ToPostgres {
     method sql-statement:sym<CREATE-INDEX> ($/) {
         my Str @parts = <CREATE>;
         @parts.push('UNIQUE') if $<unique>;
-        @parts.push('INDEX', "$<index-name>", 'ON', "$<table-name>");
+
+        my $index-name = $<index-name><identifier>[*-1];
+        @parts.push('INDEX', "$index-name", 'ON', "$<table-name>");
         @parts.push('(', @<columns>>>.made.join(', '), ')');
         @parts.push( | @<index-option>>>.made.grep({ $_ })>>.Str );
         make @parts.join(' ');

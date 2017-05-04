@@ -19,11 +19,11 @@ subtest 'basic' => {
                 , col2
             );
         ORACLE
-        "CREATE INDEX foo.idx1 ON foo.table1 ( col1, col2 );\n",
+        "CREATE INDEX idx1 ON foo.table1 ( col1, col2 );\n",
         'index';
 
     is $xlate.parse('CREATE UNIQUE INDEX foo.uniq ON foo.table ( col1 );'),
-        "CREATE UNIQUE INDEX foo.uniq ON foo.table ( col1 );\n",
+        "CREATE UNIQUE INDEX uniq ON foo.table ( col1 );\n",
         'unique index';
 }
 
@@ -31,7 +31,7 @@ subtest 'index options' => {
     plan 2;
 
     is $xlate.parse('CREATE INDEX foo.i ON foo.table ( col1 ) COMPRESS 1;'),
-        "CREATE INDEX foo.i ON foo.table ( col1 );\n",
+        "CREATE INDEX i ON foo.table ( col1 );\n",
         'COMPRESS option is dropped';
 
     is $xlate.parse(q :to<ORACLE> ),
@@ -58,7 +58,7 @@ subtest 'index options' => {
                     )
             );
         ORACLE
-        "CREATE INDEX foo.part ON foo.table ( col );\n",
+        "CREATE INDEX part ON foo.table ( col );\n",
         'GLOBAL PARTITION BY RANGE is dropped';
 }
 
@@ -66,10 +66,10 @@ subtest 'functional index' => {
     plan 2;
 
     is $xlate.parse('CREATE INDEX foo.fi ON foo.table ( substr(col, 1), substr(col2, 2, 3) );'),
-        "CREATE INDEX foo.fi ON foo.table ( substr( col, 1 ), substr( col2, 2, 3 ) );\n",
+        "CREATE INDEX fi ON foo.table ( substr( col, 1 ), substr( col2, 2, 3 ) );\n",
         'substr functional index';
 
     is $xlate.parse(q{CREATE INDEX foo.decode ON foo.table ( DECODE(col, -1, col1, '2', col2, NULL) );}),
-        "CREATE INDEX foo.decode ON foo.table ( ( CASE col WHEN -1 THEN col1 WHEN '2' THEN col2 ELSE NULL END ) );\n",
+        "CREATE INDEX decode ON foo.table ( ( CASE col WHEN -1 THEN col1 WHEN '2' THEN col2 ELSE NULL END ) );\n",
         'decode functional index';
 }
