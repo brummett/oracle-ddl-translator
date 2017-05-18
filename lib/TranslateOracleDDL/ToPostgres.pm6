@@ -3,6 +3,7 @@ use v6;
 class TranslateOracleDDL::ToPostgres {
     has $.schema;
     has Bool $.create-table-if-not-exists = False;
+    has Bool $.create-index-if-not-exists = False;
 
     method TOP($/) {
         make $<input-line>>>.made.grep({ $_ }).join("\n") ~ "\n";
@@ -192,9 +193,11 @@ class TranslateOracleDDL::ToPostgres {
     method sql-statement:sym<CREATE-INDEX> ($/) {
         my Str @parts = <CREATE>;
         @parts.push('UNIQUE') if $<unique>;
+        @parts.push('INDEX');
+        @parts.push('IF NOT EXISTS') if $!create-index-if-not-exists;
 
         my $index-name = $<index-name><identifier>[*-1];
-        @parts.push('INDEX', "$index-name", 'ON', "$<table-name>");
+        @parts.push("$index-name", 'ON', "$<table-name>");
         @parts.push('(', @<columns>>>.made.join(', '), ')');
         @parts.push( | @<index-option>>>.made.grep({ $_ })>>.Str );
         make @parts.join(' ');
