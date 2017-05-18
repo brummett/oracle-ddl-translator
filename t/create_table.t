@@ -4,9 +4,15 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
+plan 2;
+
+for (False, True) -> $create-table-if-not-exists {
+    subtest "with create-table-if-not-exists flag $create-table-if-not-exists" => {
         plan 9;
 
-        my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new);
+        my $create-table = $create-table-if-not-exists ?? 'CREATE TABLE IF NOT EXISTS' !! 'CREATE TABLE';
+
+        my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new(:$create-table-if-not-exists));
         ok $xlate, 'created translator';
 
         subtest 'basic' => {
@@ -19,7 +25,7 @@ use TranslateOracleDDL::ToPostgres;
                         , col2 NUMBER
                     );
                 ORACLE
-                "CREATE TABLE foo.table1 ( col1 VARCHAR(10), col2 DOUBLE PRECISION );\n",
+                "$create-table foo.table1 ( col1 VARCHAR(10), col2 DOUBLE PRECISION );\n",
                 'table1';
 
             is $xlate.parse( q :to<ORACLE> ),
@@ -32,7 +38,7 @@ use TranslateOracleDDL::ToPostgres;
                         ts          TIMESTAMP(6)    DEFAULT systimestamp
                     );
                 ORACLE
-                "CREATE TABLE foo.table2 ( id VARCHAR(10) NOT NULL PRIMARY KEY, name VARCHAR(20) NOT NULL, num VARCHAR DEFAULT 123, str VARCHAR DEFAULT 'a string', ts TIMESTAMP(6) DEFAULT LOCALTIMESTAMP );\n",
+                "$create-table foo.table2 ( id VARCHAR(10) NOT NULL PRIMARY KEY, name VARCHAR(20) NOT NULL, num VARCHAR DEFAULT 123, str VARCHAR DEFAULT 'a string', ts TIMESTAMP(6) DEFAULT LOCALTIMESTAMP );\n",
                 'column constraints';
         }
 
@@ -50,15 +56,15 @@ use TranslateOracleDDL::ToPostgres;
                     , numAB NUMBER  (10,2)
                     );
                 ORACLE
-                "CREATE TABLE foo.table3 ( id DOUBLE PRECISION NOT NULL, num1 SMALLINT, num3 SMALLINT, num5 INT, num9 BIGINT, num19 DECIMAL(19), numAB DECIMAL(10,2) );\n",
+                "$create-table foo.table3 ( id DOUBLE PRECISION NOT NULL, num1 SMALLINT, num3 SMALLINT, num5 INT, num9 BIGINT, num19 DECIMAL(19), numAB DECIMAL(10,2) );\n",
                 'NUMBER type conversions';
 
             is $xlate.parse( 'CREATE TABLE foo.ints ( col_a INTEGER );'),
-                             "CREATE TABLE foo.ints ( col_a DECIMAL(38) );\n",
+                             "$create-table foo.ints ( col_a DECIMAL(38) );\n",
                 'INTEGER';
 
             is $xlate.parse( 'CREATE TABLE foo.floats ( col_a FLOAT );'),
-                             "CREATE TABLE foo.floats ( col_a DOUBLE PRECISION );\n",
+                             "$create-table foo.floats ( col_a DOUBLE PRECISION );\n",
                 'FLOAT becomes DOUBLE PRECISION';
 
             throws-like { $xlate.parse( 'CREATE TABLE foo ( id NUMBER(39));' ) },
@@ -72,7 +78,7 @@ use TranslateOracleDDL::ToPostgres;
             plan 1;
 
             is $xlate.parse( 'CREATE TABLE foo.chartable ( id CHAR(1), thing CHAR(2), blah LONG );'),
-                             "CREATE TABLE foo.chartable ( id CHAR(1), thing CHAR(2), blah TEXT );\n",
+                             "$create-table foo.chartable ( id CHAR(1), thing CHAR(2), blah TEXT );\n",
                 'create table';
         }
 
@@ -80,7 +86,7 @@ use TranslateOracleDDL::ToPostgres;
             plan 1;
 
             is $xlate.parse('CREATE TABLE foo.lobs ( col_a BLOB,  col_b CLOB, col_c RAW(32) );'),
-                            "CREATE TABLE foo.lobs ( col_a BYTEA, col_b TEXT, col_c BYTEA );\n",
+                            "$create-table foo.lobs ( col_a BYTEA, col_b TEXT, col_c BYTEA );\n",
                 'create table';
         }
 
@@ -88,7 +94,7 @@ use TranslateOracleDDL::ToPostgres;
             plan 1;
 
             is $xlate.parse('CREATE TABLE foo.dates ( a_date DATE,         a_time TIMESTAMP(6) );'),
-                            "CREATE TABLE foo.dates ( a_date TIMESTAMP(0), a_time TIMESTAMP(6) );\n",
+                            "$create-table foo.dates ( a_date TIMESTAMP(0), a_time TIMESTAMP(6) );\n",
                 'create table';
         }
 
@@ -105,7 +111,7 @@ use TranslateOracleDDL::ToPostgres;
                         )
                 );
                 ORACLE
-                "CREATE TABLE foo.table_constr ( col_a VARCHAR, col_b VARCHAR, CONSTRAINT constr_name PRIMARY KEY ( col_a ) );\n",
+                "$create-table foo.table_constr ( col_a VARCHAR, col_b VARCHAR, CONSTRAINT constr_name PRIMARY KEY ( col_a ) );\n",
                 'PRIMARY KEY';
 
             is $xlate.parse( q :to<ORACLE> ),
@@ -119,7 +125,7 @@ use TranslateOracleDDL::ToPostgres;
                         )
                 );
                 ORACLE
-                "CREATE TABLE foo.table_constr ( col_a VARCHAR, col_b VARCHAR, CONSTRAINT constr_name PRIMARY KEY ( col_a, col_b ) );\n",
+                "$create-table foo.table_constr ( col_a VARCHAR, col_b VARCHAR, CONSTRAINT constr_name PRIMARY KEY ( col_a, col_b ) );\n",
                 '2-column PRIMARY KEY';
         }
 
@@ -133,7 +139,7 @@ use TranslateOracleDDL::ToPostgres;
                 )
                 ORGANIZATION    INDEX;
                 ORACLE
-                "CREATE TABLE foo.addon1 ( col_a VARCHAR );\n",
+                "$create-table foo.addon1 ( col_a VARCHAR );\n",
                 'ORGANIZATION INDEX';
 
             is $xlate.parse( q :to<ORACLE> ),
@@ -146,7 +152,7 @@ use TranslateOracleDDL::ToPostgres;
                 MONITORING
                 OVERFLOW;
                 ORACLE
-                "CREATE TABLE foo.addon2 ( col_a VARCHAR );\n",
+                "$create-table foo.addon2 ( col_a VARCHAR );\n",
                 '3 add-ons';
         }
 
@@ -165,3 +171,5 @@ use TranslateOracleDDL::ToPostgres;
                 "COMMENT ON COLUMN a.b.c IS 'this string''s funky';\n",
                 'string with embedded quote';
         }
+    }
+}

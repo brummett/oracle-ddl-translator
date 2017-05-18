@@ -2,6 +2,7 @@ use v6;
 
 class TranslateOracleDDL::ToPostgres {
     has $.schema;
+    has Bool $.create-table-if-not-exists = False;
 
     method TOP($/) {
         make $<input-line>>>.made.grep({ $_ }).join("\n") ~ "\n";
@@ -105,7 +106,8 @@ class TranslateOracleDDL::ToPostgres {
     method sql-statement:sym<CREATE-TABLE> ($/) {
         my @columns = $<create-table-column-def>>>.made;
         my @constraints = $<table-constraint-def>>>.made;
-        make "CREATE TABLE { $<entity-name>.made } ( " ~ (|@columns, |@constraints).join(', ') ~ " )"
+        my $if-not-exists = $!create-table-if-not-exists ?? ' IF NOT EXISTS' !! '';
+        make "CREATE TABLE{ $if-not-exists } { $<entity-name>.made } ( " ~ (|@columns, |@constraints).join(', ') ~ " )"
     }
 
     method create-table-column-def ($/) {
