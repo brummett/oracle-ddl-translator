@@ -22,7 +22,7 @@ class TranslateOracleDDL::ToPostgres {
     }
 
     method entity-name ($/) {
-        my @parts = @<identifier>;
+        my @parts = @<identifier>>>.made;
         if @parts.elems > 1 and self.schema {
             @parts[0] = self.schema;  # rewrite the schema if we're configured to
         }
@@ -51,6 +51,9 @@ class TranslateOracleDDL::ToPostgres {
     method create-sequence-clause:sym<NOORDER> ($/)     { make '' }
 
     method identifier-or-value ($/) { make $<entity-name> ?? $<entity-name>.made !! $<value> }
+
+    method identifier:sym<bareword>($/) { make ~ $/ }
+    method identifier:sym<qq>($/) { make ~ $/ }
 
     method value:sym<number-value> ($/)             { make "$/" }
     method value:sym<string-value> ($/)             { make "$/" }
@@ -112,7 +115,7 @@ class TranslateOracleDDL::ToPostgres {
     }
 
     method create-table-column-def ($/) {
-        my @parts = ( $<identifier>, $<column-type>.made );
+        my @parts = ( $<identifier>.made, $<column-type>.made );
         @parts.push( $<create-table-column-constraint>>>.made ) if $<create-table-column-constraint>;
         make join(' ', @parts);
     }
@@ -155,15 +158,15 @@ class TranslateOracleDDL::ToPostgres {
     method create-table-column-constraint:sym<DEFAULT> ($/) { make "DEFAULT { $<value>.made }" }
 
     method table-constraint-def ($/)        {
-        my @parts = ('CONSTRAINT', $<identifier>, $<table-constraint>.made);
+        my @parts = ('CONSTRAINT', $<identifier>.made, $<table-constraint>.made);
         if @<constraint-options>.elems {
             @parts.push: @<constraint-options>>>.made.grep({ $_ });
         }
         make @parts.join(' ');
     }
 
-    method table-constraint:sym<PRIMARY-KEY> ($/) { make "PRIMARY KEY ( { $<identifier>.join(', ') } )" }
-    method table-constraint:sym<UNIQUE> ($/)      { make "UNIQUE ( { $<identifier>.join(', ') } )" }
+    method table-constraint:sym<PRIMARY-KEY> ($/) { make "PRIMARY KEY ( { @<identifier>>>.made.join(', ') } )" }
+    method table-constraint:sym<UNIQUE> ($/)      { make "UNIQUE ( { @<identifier>>>.made.join(', ') } )" }
     method table-constraint:sym<CHECK> ($/)       { make "CHECK ( { $<expr>.made } )" }
     method table-constraint:sym<FOREIGN-KEY> ($/) {
         make "FOREIGN KEY ( { @<table-columns>.join(', ') } ) REFERENCES { $<entity-name>.made } ( { @<fk-columns>.join(', ') } )";
@@ -196,7 +199,7 @@ class TranslateOracleDDL::ToPostgres {
         @parts.push('INDEX');
         @parts.push('IF NOT EXISTS') if $!create-index-if-not-exists;
 
-        my $index-name = $<index-name><identifier>[*-1];
+        my $index-name = $<index-name><identifier>[*-1].made;
         @parts.push("$index-name", 'ON', "$<table-name>");
         @parts.push('(', @<columns>>>.made.join(', '), ')');
         @parts.push( | @<index-option>>>.made.grep({ $_ })>>.Str );
@@ -207,7 +210,7 @@ class TranslateOracleDDL::ToPostgres {
 
     method table-or-column-alias    ($/) { make "AS $<alias>" }
     method where-clause             ($/) { make "WHERE { $<expr>.made }" }
-    method group-by-clause          ($/) { make "GROUP BY { @<identifier>.join(', ') }" }
+    method group-by-clause          ($/) { make "GROUP BY { @<identifier>>>.made.join(', ') }" }
     method select-column            ($/) { make $<expr>.made ~ ( $<alias> ?? " { $<alias>.made }" !! '' ) }
     method select-from-clause       ($/) { make $<from>.made ~ ( $<alias> ?? " { $<alias>.made }" !! '' ) }
     method select-from-table:sym<name>          ($/) { make $<table-name>.made }
