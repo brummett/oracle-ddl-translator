@@ -4,7 +4,7 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
-plan 3;
+plan 4;
 
 my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new);
 ok $xlate, 'created translator';
@@ -37,4 +37,27 @@ subtest 'read-only' => {
     is $xlate.parse('CREATE VIEW foo.v ( col ) AS SELECT col FROM foo.t WITH READ ONLY;'),
         "CREATE VIEW foo.v ( col ) AS SELECT col FROM foo.t;\n",
         'WITH READ ONLY is dropped';
+}
+
+subtest 'quoted identifiers' => {
+    plan 5;
+
+    is $xlate.parse('CREATE VIEW foo.quotes ( col ) AS SELECT "col" from foo.t;'),
+        qq{CREATE VIEW foo.quotes ( col ) AS SELECT "col" FROM foo.t;\n},
+        'pass-through with quoted column name';
+
+    is $xlate.parse('CREATE VIEW foo.v ( col ) AS SELECT "col" AS col_name from foo.t;'),
+        qq{CREATE VIEW foo.v ( col ) AS SELECT "col" AS col_name FROM foo.t;\n},
+        'pass-through with quoted column name and alias';
+
+    my $no-quotes = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new(:omit-quotes-in-identifiers));
+    ok $no-quotes, 'Create translator to remove quotes';
+
+    is $no-quotes.parse('CREATE VIEW foo.v ( col ) AS SELECT "col" from foo.t;'),
+        qq{CREATE VIEW foo.v ( col ) AS SELECT col FROM foo.t;\n},
+        'remove quotes with quoted column name';
+
+    is $no-quotes.parse('CREATE VIEW foo.v ( col ) AS SELECT "col" AS col_name from foo.t;'),
+        qq{CREATE VIEW foo.v ( col ) AS SELECT col AS col_name FROM foo.t;\n},
+        'remove-quotes with quoted column name and alias';
 }

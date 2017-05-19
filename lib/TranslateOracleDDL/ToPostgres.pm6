@@ -4,6 +4,7 @@ class TranslateOracleDDL::ToPostgres {
     has $.schema;
     has Bool $.create-table-if-not-exists = False;
     has Bool $.create-index-if-not-exists = False;
+    has Bool $.omit-quotes-in-identifiers = False;
 
     method TOP($/) {
         make $<input-line>>>.made.grep({ $_ }).join("\n") ~ "\n";
@@ -53,7 +54,7 @@ class TranslateOracleDDL::ToPostgres {
     method identifier-or-value ($/) { make $<entity-name> ?? $<entity-name>.made !! $<value> }
 
     method identifier:sym<bareword>($/) { make ~ $/ }
-    method identifier:sym<qq>($/) { make ~ $/ }
+    method identifier:sym<qq>($/) { make $!omit-quotes-in-identifiers ?? ~ $<name> !! ~ $/ }
 
     method value:sym<number-value> ($/)             { make "$/" }
     method value:sym<string-value> ($/)             { make "$/" }
