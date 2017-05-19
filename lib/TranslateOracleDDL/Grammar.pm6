@@ -239,7 +239,7 @@ grammar TranslateOracleDDL::Grammar {
     }
 
     rule create-or-replace { 'CREATE' ['OR' 'REPLACE']? }
-    rule sql-statement:sym<CREATE-VIEW> {
+    rule sql-statement:sym<CREATE-VIEW> { :ignorecase
         <create-or-replace> 'VIEW'
             { $last-statement-type = 'CREATE [or replace] VIEW'; $last-pos = self.pos }
         <view-name=entity-name>
