@@ -65,7 +65,7 @@ subtest 'to_char' => {
     plan 2;
 
     is $xlate.parse('SELECT to_char(col) FROM foo;'),
-        "SELECT to_char( col ) FROM foo;\n",
+        "SELECT cast( ( col ) AS text ) FROM foo;\n",
         '1-arg';
 
     is $xlate.parse(q{SELECT to_char(date, 'MM/DD/YYYY') FROM foo;}),
@@ -165,7 +165,7 @@ subtest 'nested function calls' => {
         'substr() and decode()';
 
     is $xlate.parse('SELECT TO_CHAR(CASE WHEN col1 IS NOT NULL THEN col2 WHEN col1 = 1 THEN col3 ELSE col4 END) FROM foo;'),
-        "SELECT to_char( CASE WHEN col1 IS NOT NULL THEN col2 WHEN col1 = 1 THEN col3 ELSE col4 END ) FROM foo;\n",
+        "SELECT cast( ( CASE WHEN col1 IS NOT NULL THEN col2 WHEN col1 = 1 THEN col3 ELSE col4 END ) AS text ) FROM foo;\n",
         'CASE inside to_char()';
 }
 
