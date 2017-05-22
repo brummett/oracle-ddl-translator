@@ -62,6 +62,7 @@ grammar TranslateOracleDDL::Grammar {
     token expr-operator:sym<sub>  { '-' }
     token expr-operator:sym<add>  { '+' }
     token expr-operator:sym<concat> { '||' }
+    token expr-operator:sym<like> { :ignorecase 'LIKE' }
 
     token and-or-keyword                { :ignorecase 'and' | 'or' }
     proto rule expr { * }
@@ -69,10 +70,10 @@ grammar TranslateOracleDDL::Grammar {
     rule expr:sym<and-or>               { <expr-comparison> <and-or-keyword> <expr> }
     rule expr:sym<simple>               { <expr-comparison> }
     rule expr:sym<atom>                 { <identifier-or-value> }
+
     proto rule expr-comparison          { * }
     rule expr-comparison:sym<operator>  { <left=identifier-or-value> <expr-operator> <right=expr> }
     rule expr-comparison:sym<NULL>      { :ignorecase <entity-name> $<null-test-operator>=('IS' ['NOT']? 'NULL') }
-    rule expr-comparison:sym<LIKE>      { :ignorecase <entity-name> 'LIKE' <expr> }
     rule expr-comparison:sym<IN>        { :ignorecase <entity-name> 'IN' '(' [ <value> + % ',' ] ')' }
         rule case-when-clause           { :ignorecase 'WHEN' <case=expr> 'THEN' <then=expr> }
         rule else-clause                { :ignorecase 'ELSE' <expr> }
