@@ -61,7 +61,6 @@ class TranslateOracleDDL::ToPostgres {
     method value:sym<systimestamp-function> ($/)    { make 'LOCALTIMESTAMP' }
 
     method expr:sym<simple>              ($/)       { make $<expr-comparison>.made }
-    method expr:sym<and-or>              ($/)       { make "{ $<expr-comparison>.made } $<and-or-keyword> { $<expr>.made }" }
     method expr:sym<infix-operator>      ($/)       { make "{$<left>.made} $<expr-operator> {$<right>.made}" }
     method expr:sym<recurse-and-or>      ($/)       {
         my Str $str = "( { @<expr>.shift.made } )";
