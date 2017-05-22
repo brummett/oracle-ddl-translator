@@ -68,11 +68,10 @@ grammar TranslateOracleDDL::Grammar {
     proto rule expr { * }
     rule expr:sym<recurse-and-or>       { [ '(' <expr> ')' ]+ % <and-or-keyword> }
     rule expr:sym<and-or>               { <expr-comparison> <and-or-keyword> <expr> }
+    rule expr:sym<infix-operator>       { <left=expr-comparison> <expr-operator> <right=expr> }
     rule expr:sym<simple>               { <expr-comparison> }
-    rule expr:sym<atom>                 { <identifier-or-value> }
 
     proto rule expr-comparison          { * }
-    rule expr-comparison:sym<operator>  { <left=identifier-or-value> <expr-operator> <right=expr> }
     rule expr-comparison:sym<NULL>      { :ignorecase <entity-name> $<null-test-operator>=('IS' ['NOT']? 'NULL') }
     rule expr-comparison:sym<IN>        { :ignorecase <entity-name> 'IN' '(' [ <value> + % ',' ] ')' }
         rule case-when-clause           { :ignorecase 'WHEN' <case=expr> 'THEN' <then=expr> }
@@ -89,6 +88,7 @@ grammar TranslateOracleDDL::Grammar {
     rule expr-comparison:sym<sign-f>    { :ignorecase 'sign' '(' <expr> ')' }
     rule expr-comparison:sym<count-f>   { :ignorecase 'count' '(' <expr> ')' }
     rule expr-comparison:sym<sum-f>     { :ignorecase 'sum' '(' <expr> ')' }
+    rule expr-comparison:sym<atom>      { <identifier-or-value> }
 
     proto token entity-type { * }
     token entity-type:sym<TABLE> { <sym> }
