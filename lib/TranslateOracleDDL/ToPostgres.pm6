@@ -61,8 +61,8 @@ class TranslateOracleDDL::ToPostgres {
     method value:sym<systimestamp-function> ($/)    { make 'LOCALTIMESTAMP' }
 
     method expr:sym<simple>              ($/)       { make $<expr-comparison>.made }
-    method expr:sym<atom>                ($/)       { make $<identifier-or-value>.made }
     method expr:sym<and-or>              ($/)       { make "{ $<expr-comparison>.made } $<and-or-keyword> { $<expr>.made }" }
+    method expr:sym<infix-operator>      ($/)       { make "{$<left>.made} $<expr-operator> {$<right>.made}" }
     method expr:sym<recurse-and-or>      ($/)       {
         my Str $str = "( { @<expr>.shift.made } )";
         for @<and-or-keyword> Z @<expr> -> ( $and-or, $expr ) {
@@ -71,7 +71,7 @@ class TranslateOracleDDL::ToPostgres {
         make $str;
     }
 
-    method expr-comparison:sym<operator> ($/)       { make "{$<left>.made} $<expr-operator> {$<right>.made}" }
+    method expr-comparison:sym<atom>     ($/)       { make $<identifier-or-value>.made }
     method expr-comparison:sym<NULL>     ($/)       { make "{ $<entity-name>.made } $<null-test-operator>" }
     method expr-comparison:sym<IN>       ($/)       { make "{ $<entity-name>.made } IN ( { @<value>>>.made.join(', ') } )" }
     method expr-comparison:sym<not-f>    ($/)       { make "NOT( { $<expr>.made } )" }

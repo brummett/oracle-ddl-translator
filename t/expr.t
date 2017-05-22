@@ -4,7 +4,7 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
-plan 13;
+plan 14;
 
 my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new);
 ok $xlate, 'created translator';
@@ -175,4 +175,12 @@ subtest 'LIKE' => {
     is $xlate.parse(q{SELECT col FROM foo WHERE col LIKE '%thing%';}),
         "SELECT col FROM foo WHERE col LIKE '%thing%';\n",
         'basic';
+}
+
+subtest 'expr with multiple operators' => {
+    plan 1;
+
+    is $xlate.parse(q{select x FROM foo WHERE a=to_char(b)||' extra stuff';}),
+        "SELECT x FROM foo WHERE a = cast( ( b ) AS text ) || ' extra stuff';\n",
+        'right side of expr has operators of its own';
 }
