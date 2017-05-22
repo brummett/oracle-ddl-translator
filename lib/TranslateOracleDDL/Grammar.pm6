@@ -63,11 +63,11 @@ grammar TranslateOracleDDL::Grammar {
     token expr-operator:sym<add>  { '+' }
     token expr-operator:sym<concat> { '||' }
     token expr-operator:sym<like> { :ignorecase 'LIKE' }
+    token and-or-keyword { :ignorecase 'and' | 'or' }
+    token expr-operator:sym<conjunction> { <and-or-keyword> }
 
-    token and-or-keyword                { :ignorecase 'and' | 'or' }
     proto rule expr { * }
     rule expr:sym<recurse-and-or>       { [ '(' <expr> ')' ]+ % <and-or-keyword> }
-    rule expr:sym<and-or>               { <expr-comparison> <and-or-keyword> <expr> }
     rule expr:sym<infix-operator>       { <left=expr-comparison> <expr-operator> <right=expr> }
     rule expr:sym<simple>               { <expr-comparison> }
 
