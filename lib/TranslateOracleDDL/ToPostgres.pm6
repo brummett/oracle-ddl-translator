@@ -241,8 +241,5 @@ class TranslateOracleDDL::ToPostgres {
             ~ $<select-statement>.made;
     }
 
-    method sql-statement:sym<special-CREATE-VIEW> ($/) {
-        make ~$/;
-    }
 }
 
