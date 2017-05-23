@@ -95,7 +95,7 @@ subtest 'join' => {
 }
 
 subtest 'table AS clause' => {
-    plan 2;
+    plan 3;
 
     is $xlate.parse(q{SELECT t.col FROM table AS t;}),
         "SELECT t.col FROM table AS t;\n",
@@ -104,6 +104,10 @@ subtest 'table AS clause' => {
     is $xlate.parse(q{SELECT t.col FROM table t;}),
         "SELECT t.col FROM table AS t;\n",
         'implied AS';
+
+    is $xlate.parse(q{SELECT t.col FROM table t JOIN schema.stuff s on schema.s.id = t.id;}),
+        "SELECT t.col FROM table AS t JOIN schema.stuff AS s ON s.id = t.id;\n",
+        'omit schema from table alias';
 }
 
 subtest 'DISTINCT' => {

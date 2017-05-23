@@ -6,6 +6,8 @@ class TranslateOracleDDL::ToPostgres {
     has Bool $.create-index-if-not-exists = False;
     has Bool $.omit-quotes-in-identifiers = False;
 
+    has Str %!entity-aliases;
+
     method TOP($/) {
         make $<input-line>>>.made.grep({ $_ }).join("\n") ~ "\n";
     }
@@ -24,7 +26,12 @@ class TranslateOracleDDL::ToPostgres {
 
     method entity-name ($/) {
         my @parts = @<identifier>>>.made;
-        if @parts.elems > 1 and self.schema {
+        if @parts.elems > 1 and %!entity-aliases{ @parts[1] }:exists {
+            # If this is schema.alias.col or schema.alias, drop the schema
+            # as Postgres doesn't support schemas prefixing aliases
+            @parts.shift;
+
+        } elsif @parts.elems > 1 and self.schema {
             @parts[0] = self.schema;  # rewrite the schema if we're configured to
         }
         make join('.', @parts);
@@ -212,7 +219,19 @@ class TranslateOracleDDL::ToPostgres {
     method where-clause             ($/) { make "WHERE { $<expr>.made }" }
     method group-by-clause          ($/) { make "GROUP BY { @<identifier>>>.made.join(', ') }" }
     method select-column            ($/) { make $<expr>.made ~ ( $<alias> ?? " { $<alias>.made }" !! '' ) }
-    method select-from-clause       ($/) { make $<from>.made ~ ( $<alias> ?? " { $<alias>.made }" !! '' ) }
+    method select-from-clause       ($/) {
+        my Str ($table_name, $alias);
+        $table_name = $<from>.made;
+        if $<alias> {
+            if $<alias><alias><name> {  # a quoted string as an alias name
+                $alias = ~ $<alias><alias><name>;
+            } elsif $<alias><alias>  {  # an unquoted alias name
+                $alias = $<alias><alias>.made;
+            }
+            %!entity-aliases{$alias} = $table_name;
+        }
+        make $<from>.made ~ ( $<alias> ?? " { $<alias>.made }" !! '' );
+    }
     method select-from-table:sym<name>          ($/) { make $<table-name>.made }
     method select-from-table:sym<inline-view>   ($/) { make "( { $<select-statement>.made } )" }
 
