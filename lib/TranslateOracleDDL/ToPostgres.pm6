@@ -60,7 +60,7 @@ class TranslateOracleDDL::ToPostgres {
     method value:sym<string-value> ($/)             { make "$/" }
     method value:sym<systimestamp-function> ($/)    { make 'LOCALTIMESTAMP' }
 
-    method expr:sym<simple>              ($/)       { make $<expr-comparison>.made }
+    method expr:sym<simple>              ($/)       { make $<expr-simple>.made }
     method expr:sym<infix-operator>      ($/)       { make "{$<left>.made} $<expr-operator> {$<right>.made}" }
     method expr:sym<recurse-and-or>      ($/)       {
         my Str $str = "( { @<expr>.shift.made } )";
@@ -70,20 +70,20 @@ class TranslateOracleDDL::ToPostgres {
         make $str;
     }
 
-    method expr-comparison:sym<atom>     ($/)       { make $<identifier-or-value>.made }
-    method expr-comparison:sym<NULL>     ($/)       { make "{ $<entity-name>.made } $<null-test-operator>" }
-    method expr-comparison:sym<IN>       ($/)       { make "{ $<entity-name>.made } IN ( { @<value>>>.made.join(', ') } )" }
-    method expr-comparison:sym<not-f>    ($/)       { make "NOT( { $<expr>.made } )" }
-    method expr-comparison:sym<trunc-f>  ($/)       { make "trunc( { $<expr>.made } )" }
-    method expr-comparison:sym<to_char-1>($/)       { make "cast( ( { $<expr>.made } ) AS text )" }
-    method expr-comparison:sym<to_char-f>($/)       { make "to_char( { $<expr>>>.made.join(', ') } )" }
-    method expr-comparison:sym<upper-f>  ($/)       { make "upper( { $<expr>.made } )" }
-    method expr-comparison:sym<lower-f>  ($/)       { make "lower( { $<expr>.made } )" }
-    method expr-comparison:sym<sign-f>   ($/)       { make "sign( { $<expr>.made } )" }
-    method expr-comparison:sym<count-f>  ($/)       { make "count( { $<expr>.made } )" }
-    method expr-comparison:sym<sum-f>    ($/)       { make "sum( { $<expr>.made } )" }
-    method expr-comparison:sym<substr-f> ($/)       { make 'substr( ' ~ @<expr>>>.made.join(', ') ~ ' )' }
-    method expr-comparison:sym<decode-f> ($/)       {
+    method expr-simple:sym<atom>     ($/)       { make $<identifier-or-value>.made }
+    method expr-simple:sym<NULL>     ($/)       { make "{ $<entity-name>.made } $<null-test-operator>" }
+    method expr-simple:sym<IN>       ($/)       { make "{ $<entity-name>.made } IN ( { @<value>>>.made.join(', ') } )" }
+    method expr-simple:sym<not-f>    ($/)       { make "NOT( { $<expr>.made } )" }
+    method expr-simple:sym<trunc-f>  ($/)       { make "trunc( { $<expr>.made } )" }
+    method expr-simple:sym<to_char-1>($/)       { make "cast( ( { $<expr>.made } ) AS text )" }
+    method expr-simple:sym<to_char-f>($/)       { make "to_char( { $<expr>>>.made.join(', ') } )" }
+    method expr-simple:sym<upper-f>  ($/)       { make "upper( { $<expr>.made } )" }
+    method expr-simple:sym<lower-f>  ($/)       { make "lower( { $<expr>.made } )" }
+    method expr-simple:sym<sign-f>   ($/)       { make "sign( { $<expr>.made } )" }
+    method expr-simple:sym<count-f>  ($/)       { make "count( { $<expr>.made } )" }
+    method expr-simple:sym<sum-f>    ($/)       { make "sum( { $<expr>.made } )" }
+    method expr-simple:sym<substr-f> ($/)       { make 'substr( ' ~ @<expr>>>.made.join(', ') ~ ' )' }
+    method expr-simple:sym<decode-f> ($/)       {
         my @cases;
         for @<case> Z @<result> -> ($case, $result) {
             @cases.push("WHEN $case THEN { $result.made }");
@@ -96,7 +96,7 @@ class TranslateOracleDDL::ToPostgres {
 
     method case-when-clause         ($/)    { make "WHEN { $<case>.made } THEN { $<then>.made }" }
     method else-clause              ($/)    { make "ELSE { $<expr>.made }" }
-    method expr-comparison:sym<CASE>($/)    {
+    method expr-simple:sym<CASE>($/)    {
         make "CASE "
                 ~ $<when-clause>>>.made.join(' ')
                 ~ ( $<else-clause> ?? " { $<else-clause>.made }" !! '' )

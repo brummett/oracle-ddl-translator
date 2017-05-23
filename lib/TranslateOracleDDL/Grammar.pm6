@@ -68,27 +68,27 @@ grammar TranslateOracleDDL::Grammar {
 
     proto rule expr { * }
     rule expr:sym<recurse-and-or>       { [ '(' <expr> ')' ]+ % <and-or-keyword> }
-    rule expr:sym<infix-operator>       { <left=expr-comparison> <expr-operator> <right=expr> }
-    rule expr:sym<simple>               { <expr-comparison> }
+    rule expr:sym<infix-operator>       { <left=expr-simple> <expr-operator> <right=expr> }
+    rule expr:sym<simple>               { <expr-simple> }
 
-    proto rule expr-comparison          { * }
-    rule expr-comparison:sym<NULL>      { :ignorecase <entity-name> $<null-test-operator>=('IS' ['NOT']? 'NULL') }
-    rule expr-comparison:sym<IN>        { :ignorecase <entity-name> 'IN' '(' [ <value> + % ',' ] ')' }
+    proto rule expr-simple          { * }
+    rule expr-simple:sym<NULL>      { :ignorecase <entity-name> $<null-test-operator>=('IS' ['NOT']? 'NULL') }
+    rule expr-simple:sym<IN>        { :ignorecase <entity-name> 'IN' '(' [ <value> + % ',' ] ')' }
         rule case-when-clause           { :ignorecase 'WHEN' <case=expr> 'THEN' <then=expr> }
         rule else-clause                { :ignorecase 'ELSE' <expr> }
-    rule expr-comparison:sym<CASE>      { :ignorecase 'CASE' <when-clause=case-when-clause>* <else-clause>? 'END' }
-    rule expr-comparison:sym<not-f>     { :ignorecase 'NOT' '(' <expr> ')' }
-    rule expr-comparison:sym<substr-f>  { :ignorecase 'substr' '(' <expr>**2..3 % ',' ')' }
-    rule expr-comparison:sym<decode-f>  { :ignorecase 'decode' '(' <topic=expr> ',' [ [ <case=value> ',' <result=expr> ]+? % ',' ] [ ',' <default=expr> ]? ')' }
-    rule expr-comparison:sym<trunc-f>   { :ignorecase 'trunc' '(' <expr> ')' }
-    rule expr-comparison:sym<to_char-1> { :ignorecase 'to_char' '(' <expr> ')' }
-    rule expr-comparison:sym<to_char-f> { :ignorecase 'to_char' '(' <expr>**2 % ',' ')' }   # Maybe parse the format specially?
-    rule expr-comparison:sym<upper-f>   { :ignorecase 'upper' '(' <expr> ')' }
-    rule expr-comparison:sym<lower-f>   { :ignorecase 'lower' '(' <expr> ')' }
-    rule expr-comparison:sym<sign-f>    { :ignorecase 'sign' '(' <expr> ')' }
-    rule expr-comparison:sym<count-f>   { :ignorecase 'count' '(' <expr> ')' }
-    rule expr-comparison:sym<sum-f>     { :ignorecase 'sum' '(' <expr> ')' }
-    rule expr-comparison:sym<atom>      { <identifier-or-value> }
+    rule expr-simple:sym<CASE>      { :ignorecase 'CASE' <when-clause=case-when-clause>* <else-clause>? 'END' }
+    rule expr-simple:sym<not-f>     { :ignorecase 'NOT' '(' <expr> ')' }
+    rule expr-simple:sym<substr-f>  { :ignorecase 'substr' '(' <expr>**2..3 % ',' ')' }
+    rule expr-simple:sym<decode-f>  { :ignorecase 'decode' '(' <topic=expr> ',' [ [ <case=value> ',' <result=expr> ]+? % ',' ] [ ',' <default=expr> ]? ')' }
+    rule expr-simple:sym<trunc-f>   { :ignorecase 'trunc' '(' <expr> ')' }
+    rule expr-simple:sym<to_char-1> { :ignorecase 'to_char' '(' <expr> ')' }
+    rule expr-simple:sym<to_char-f> { :ignorecase 'to_char' '(' <expr>**2 % ',' ')' }   # Maybe parse the format specially?
+    rule expr-simple:sym<upper-f>   { :ignorecase 'upper' '(' <expr> ')' }
+    rule expr-simple:sym<lower-f>   { :ignorecase 'lower' '(' <expr> ')' }
+    rule expr-simple:sym<sign-f>    { :ignorecase 'sign' '(' <expr> ')' }
+    rule expr-simple:sym<count-f>   { :ignorecase 'count' '(' <expr> ')' }
+    rule expr-simple:sym<sum-f>     { :ignorecase 'sum' '(' <expr> ')' }
+    rule expr-simple:sym<atom>      { <identifier-or-value> }
 
     proto token entity-type { * }
     token entity-type:sym<TABLE> { <sym> }
