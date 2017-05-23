@@ -232,6 +232,11 @@ class TranslateOracleDDL::ToPostgres {
             %!entity-aliases{$alias-name} = $table-name;
         }
     }
+    method generate-inline-view-alias(Match $select-statement --> Str) {
+        state Int $i = 0;
+        $i++;
+        return "AS alias_$i";
+    }
 
     method select-from-table:sym<name>          ($/) {
         self.register-alias(alias => $<alias>, table-name => $<table-name>.made);
@@ -239,7 +244,8 @@ class TranslateOracleDDL::ToPostgres {
     }
     method select-from-table:sym<inline-view>   ($/) {
         self.register-alias(alias => $<alias>, table-name => 'inline-view');
-        make "( { $<select-statement>.made } )" ~ ( $<alias> ?? " { $<alias>.made }" !! '' );
+        my Str $alias = $<alias> ?? ~ $<alias>.made !! self.generate-inline-view-alias($<select-statement>);
+        make "( { $<select-statement>.made } ) $alias";
     }
 
     method join-clause      ($/)    {
