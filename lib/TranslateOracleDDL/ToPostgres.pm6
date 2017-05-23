@@ -219,17 +219,22 @@ class TranslateOracleDDL::ToPostgres {
     method where-clause             ($/) { make "WHERE { $<expr>.made }" }
     method group-by-clause          ($/) { make "GROUP BY { @<identifier>>>.made.join(', ') }" }
     method select-column            ($/) { make $<expr>.made ~ ( $<alias> ?? " { $<alias>.made }" !! '' ) }
-    method select-from-clause       ($/) {
-        my Str ($table_name, $alias);
-        $table_name = $<from>.made;
-        if $<alias> {
-            if $<alias><alias><name> {  # a quoted string as an alias name
-                $alias = ~ $<alias><alias><name>;
-            } elsif $<alias><alias>  {  # an unquoted alias name
-                $alias = $<alias><alias>.made;
+
+    multi method register-alias(Nil :$alias) { }    # For when there was alias in the match
+    multi method register-alias(Match :$alias, Str :$table-name) {
+        my Str $alias-name;
+        if $alias {
+            if $alias<alias><name> {  # a quoted string as an alias name
+                $alias-name = ~ $alias<alias><name>;
+            } elsif $alias<alias>  {  # an unquoted alias name
+                $alias-name = $alias<alias>.made;
             }
-            %!entity-aliases{$alias} = $table_name;
+            %!entity-aliases{$alias-name} = $table-name;
         }
+    }
+
+    method select-from-clause       ($/) {
+        self.register-alias(alias => $<alias>, table-name => $<from>.made);
         make $<from>.made ~ ( $<alias> ?? " { $<alias>.made }" !! '' );
     }
     method select-from-table:sym<name>          ($/) { make $<table-name>.made }
