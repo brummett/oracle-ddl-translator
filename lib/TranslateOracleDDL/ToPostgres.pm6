@@ -233,12 +233,14 @@ class TranslateOracleDDL::ToPostgres {
         }
     }
 
-    method select-from-clause       ($/) {
-        self.register-alias(alias => $<alias>, table-name => $<from>.made);
-        make $<from>.made ~ ( $<alias> ?? " { $<alias>.made }" !! '' );
+    method select-from-table:sym<name>          ($/) {
+        self.register-alias(alias => $<alias>, table-name => $<table-name>.made);
+        make $<table-name>.made ~ ( $<alias> ?? " { $<alias>.made }" !! '' );
     }
-    method select-from-table:sym<name>          ($/) { make $<table-name>.made }
-    method select-from-table:sym<inline-view>   ($/) { make "( { $<select-statement>.made } )" }
+    method select-from-table:sym<inline-view>   ($/) {
+        self.register-alias(alias => $<alias>, table-name => 'inline-view');
+        make "( { $<select-statement>.made } )" ~ ( $<alias> ?? " { $<alias>.made }" !! '' );
+    }
 
     method join-clause      ($/)    {
         make
@@ -252,7 +254,7 @@ class TranslateOracleDDL::ToPostgres {
         make 'SELECT '
                 ~ ( $<distinct> ?? 'DISTINCT ' !!  '' )
                 ~ $<columns>>>.made.join(', ')
-                ~ " FROM { @<select-from-clause>>>.made.join(', ') }"
+                ~ " FROM { @<select-from-table>>>.made.join(', ') }"
                 ~ ( @<join-clause>.elems ?? " { @<join-clause>>>.made.join(' ') }" !! '' )
                 ~ ( $<where-clause> ?? " { $<where-clause>.made }" !! '' )
                 ~ ( $<group-by-clause> ?? " { $<group-by-clause>.made }" !! '' );
