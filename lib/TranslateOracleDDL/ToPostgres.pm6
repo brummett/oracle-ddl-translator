@@ -13,7 +13,7 @@ class TranslateOracleDDL::ToPostgres {
     }
 
     method input-line:sym<sqlplus-directive>    ($/) { make $<sqlplus-directive>.made }
-    method input-line:sym<sql-statement>        ($/) { make $<sql-statement>.made ?? "{$<sql-statement>.made};" !! Str }
+    method input-line:sym<sql-statement>        ($/) { make $<sql-statement>.made ?? "{$<sql-statement>.made};" !! Str; %!entity-aliases = (); }
 
     method sqlplus-directive:sym<REM>   ($/) { make '--' ~ ($<string-to-end-of-line> || '') }
     method sqlplus-directive:sym<PROMPT>($/) { make "\\echo" ~ ($<string-to-end-of-line> ?? " $<string-to-end-of-line>" !! '') }
