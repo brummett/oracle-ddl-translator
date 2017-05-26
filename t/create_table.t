@@ -118,14 +118,14 @@ for (False, True) -> $create-table-if-not-exists {
                 CREATE TABLE foo.table_constr (
                     col_a VARCHAR2
                     , col_b VARCHAR2
-                    , CONSTRAINT constr_name PRIMARY KEY
+                    , CONSTRAINT constr_name2 PRIMARY KEY
                         (
                             col_a
                             , col_b
                         )
                 );
                 ORACLE
-                "$create-table foo.table_constr ( col_a VARCHAR, col_b VARCHAR, CONSTRAINT constr_name PRIMARY KEY ( col_a, col_b ) );\n",
+                "$create-table foo.table_constr ( col_a VARCHAR, col_b VARCHAR, CONSTRAINT constr_name2 PRIMARY KEY ( col_a, col_b ) );\n",
                 '2-column PRIMARY KEY';
         }
 
