@@ -1,6 +1,6 @@
 use YAMLish;
 
-enum CacheKey < PK_CONSTRAINT >;
+enum CacheKey < CONSTRAINT_NAME >;
 
 class TranslateOracleDDL::StateFile {
     has $.filename;

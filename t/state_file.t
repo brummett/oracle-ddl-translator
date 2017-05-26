@@ -15,14 +15,14 @@ subtest 'basic' => {
 
     my @keys = <foo bar>;
     for @keys -> $key {
-        ok $original.set(type => PK_CONSTRAINT, name => $key), "set $key";
-        ok ! $original.set(type => PK_CONSTRAINT, name => $key), "cannot set $key again";
+        ok $original.set(type => CONSTRAINT_NAME, name => $key), "set $key";
+        ok ! $original.set(type => CONSTRAINT_NAME, name => $key), "cannot set $key again";
     }
     ok $original.write(), 'write file';
     
     ok my $copy = TranslateOracleDDL::StateFile.new(:$filename), 'Create StateFile with the same file';
     for @keys -> $key {
-        ok ! $copy.set(type => PK_CONSTRAINT, name => $key), "cannot set $key from copy";
+        ok ! $copy.set(type => CONSTRAINT_NAME, name => $key), "cannot set $key from copy";
     }
-    ok $copy.set(type => PK_CONSTRAINT, name => 'baz'), 'set baz on copy';
+    ok $copy.set(type => CONSTRAINT_NAME, name => 'baz'), 'set baz on copy';
 }
