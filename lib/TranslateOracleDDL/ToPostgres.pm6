@@ -1,7 +1,7 @@
 use v6;
 
 class TranslateOracleDDL::ToPostgres {
-    has $.schema;
+    has Str $.schema;
     has Bool $.create-table-if-not-exists = False;
     has Bool $.create-index-if-not-exists = False;
     has Bool $.omit-quotes-in-identifiers = False;
@@ -31,8 +31,8 @@ class TranslateOracleDDL::ToPostgres {
             # as Postgres doesn't support schemas prefixing aliases
             @parts.shift;
 
-        } elsif @parts.elems > 1 and self.schema {
-            @parts[0] = self.schema;  # rewrite the schema if we're configured to
+        } elsif @parts.elems > 1 and $!schema {
+            @parts[0] = $!schema;  # rewrite the schema if we're configured to
         }
         make join('.', @parts);
     }
