@@ -1,19 +1,57 @@
 use v6;
 
+use TranslateOracleDDL::StateFile;
+
+my role DuplicateConstraint { }
+
 class TranslateOracleDDL::ToPostgres {
     has Str $.schema;
     has Bool $.create-table-if-not-exists = False;
     has Bool $.create-index-if-not-exists = False;
     has Bool $.omit-quotes-in-identifiers = False;
 
+    has TranslateOracleDDL::StateFile $!state-file handles ( save-state => 'write' );
     has Str %!entity-aliases;
+
+    method BUILD(Bool :$!create-table-if-not-exists, Bool :$!create-index-if-not-exists, Bool :$!omit-quotes-in-identifiers, Str :$!schema,
+                Str :$state-file-name = '/dev/null'
+    ) {
+        $!state-file = TranslateOracleDDL::StateFile.new(filename => $state-file-name);
+    }
+
+    sub should-omit-statement(Match $m --> Bool) {
+        return True if $m.made ~~ DuplicateConstraint;
+        my @sub-matches;
+        for $m.list -> $positional {
+            @sub-matches.push( $positional ~~ Positional ?? |$positional !! $positional );
+        }
+        for $m.hash.values -> $named {
+            @sub-matches.push( $named ~~ Positional ?? |$named !! $named );
+        }
+
+        for @sub-matches -> $sub-match {
+            return True if should-omit-statement($sub-match);
+        }
+        return False;
+    }
 
     method TOP($/) {
         make $<input-line>>>.made.grep({ $_ }).join("\n") ~ "\n";
     }
 
     method input-line:sym<sqlplus-directive>    ($/) { make $<sqlplus-directive>.made }
-    method input-line:sym<sql-statement>        ($/) { make $<sql-statement>.made ?? "{$<sql-statement>.made};" !! Str; %!entity-aliases = (); }
+    method input-line:sym<sql-statement>        ($/) {
+        if should-omit-statement($<sql-statement>) {
+            make Str;
+
+        } elsif $<sql-statement>.made {
+            make "{$<sql-statement>.made};"
+
+        } else {
+            make Str;
+        }
+        %!entity-aliases = ();
+    }
 
     method sqlplus-directive:sym<REM>   ($/) { make '--' ~ ($<string-to-end-of-line> || '') }
     method sqlplus-directive:sym<PROMPT>($/) { make "\\echo" ~ ($<string-to-end-of-line> ?? " $<string-to-end-of-line>" !! '') }
@@ -169,7 +207,9 @@ class TranslateOracleDDL::ToPostgres {
         if @<constraint-options>.elems {
             @parts.push: @<constraint-options>>>.made.grep({ $_ });
         }
-        make @parts.join(' ');
+        my Str $constraint = @parts.join(' ');
+        $constraint does DuplicateConstraint unless $!state-file.set(type => CONSTRAINT_NAME, name => $<identifier>.made);
+        make $constraint;
     }
 
     method table-constraint:sym<PRIMARY-KEY> ($/) { make "PRIMARY KEY ( { @<identifier>>>.made.join(', ') } )" }
