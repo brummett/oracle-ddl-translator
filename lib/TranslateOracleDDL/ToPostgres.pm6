@@ -207,6 +207,7 @@ class TranslateOracleDDL::ToPostgres {
         if @<constraint-options>.elems {
             @parts.push: @<constraint-options>>>.made.grep({ $_ });
         }
+
         my Str $constraint = @parts.join(' ');
         $constraint does DuplicateConstraint unless $!state-file.set(type => CONSTRAINT_NAME, name => $<identifier>.made);
         make $constraint;
@@ -250,7 +251,10 @@ class TranslateOracleDDL::ToPostgres {
         @parts.push("$index-name", 'ON', "$<table-name>");
         @parts.push('(', @<columns>>>.made.join(', '), ')');
         @parts.push( | @<index-option>>>.made.grep({ $_ })>>.Str );
-        make @parts.join(' ');
+
+        my Str $index = @parts.join(' ');
+        $index does DuplicateConstraint if $<unique> and ! $!state-file.set(type => CONSTRAINT_NAME, name => $index-name);
+        make $index;
     }
 
     method sql-statement:sym<broken-CREATE-INDEX> ($/) { make Str }

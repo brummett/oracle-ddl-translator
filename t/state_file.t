@@ -29,12 +29,30 @@ subtest 'basic' => {
     ok $copy.set(type => CONSTRAINT_NAME, name => 'baz'), 'set baz on copy';
 }
 
-subtest 'PK constraint state' => {
+subtest 'constraint state' => {
     my @tests = ( %( send => (  'CREATE TABLE foo ( id VARCHAR2 NOT NULL, CONSTRAINT pk_name PRIMARY KEY (id) );',
                                 'ALTER TABLE foo ADD CONSTRAINT pk_name PRIMARY KEY (id);' ),
                      expect => ("CREATE TABLE foo ( id VARCHAR NOT NULL, CONSTRAINT pk_name PRIMARY KEY ( id ) );\n",
                                 "\n" ),
                      label => 'table first, then add constraint',
+                    ),
+                  %( send => (  'ALTER TABLE foo ADD CONSTRAINT uk UNIQUE (name);',
+                                'CREATE UNIQUE INDEX uk ON foo(name);' ),
+                     expect => ("ALTER TABLE foo ADD CONSTRAINT uk UNIQUE ( name );\n",
+                                "\n" ),
+                     label => 'add constraint then unique index',
+                    ),
+                  %( send => (  'CREATE UNIQUE INDEX uk ON foo(name);',
+                                'ALTER TABLE foo ADD CONSTRAINT uk UNIQUE (name);' ),
+                     expect => ("CREATE UNIQUE INDEX uk ON foo ( name );\n",
+                                "\n" ),
+                     label => 'add constraint then unique index',
+                    ),
+                  %( send => (  'ALTER TABLE foo ADD CONSTRAINT blah PRIMARY KEY ( id );',
+                                'ALTER TABLE foo ADD CONSTRAINT blah PRIMARY KEY ( id );' ),
+                     expect => ("ALTER TABLE foo ADD CONSTRAINT blah PRIMARY KEY ( id );\n",
+                                "\n" ),
+                     label => 'add the same constraint twice',
                     ),
                 );
 
