@@ -237,7 +237,7 @@ grammar TranslateOracleDDL::Grammar {
         '(' <partition-clause>+ % ',' ')'
     }
 
-    rule partition-clause { 'PARTITION' <identifier> VALUES LESS THAN '(' <expr> ')' }
+    rule partition-clause { 'PARTITION' <identifier> VALUES LESS THAN '(' [ <expr> | '' ] ')' }
 
 
     rule create-or-replace { 'CREATE' ['OR' 'REPLACE']? }

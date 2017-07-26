@@ -34,7 +34,7 @@ for (False, True) -> $create-index-if-not-exists {
         }
 
         subtest 'index options' => {
-            plan 2;
+            plan 3;
 
             is $xlate.parse('CREATE INDEX foo.i ON foo.table ( col1 ) COMPRESS 1;'),
                 "$create-index i ON foo.table ( col1 );\n",
@@ -66,6 +66,29 @@ for (False, True) -> $create-index-if-not-exists {
                 ORACLE
                 "$create-index part ON foo.table ( col );\n",
                 'GLOBAL PARTITION BY RANGE is dropped';
+
+            is $xlate.parse(q :to<ORACLE> ),
+                CREATE INDEX foo.part2 ON foo.table
+                    (
+                        col
+                    )
+                    GLOBAL PARTITION BY RANGE
+                    (
+                        col
+                    )
+                    (
+                        PARTITION part1 VALUES LESS THAN
+                            (
+
+                            )
+                        , PARTITION part2 VALUES LESS THAN
+                            (
+
+                            )
+                    );
+                ORACLE
+                "$create-index part2 ON foo.table ( col );\n",
+                'GLOBAL PARTITION BY RANGE with broken partitions is dropped';
         }
 
         subtest 'functional index' => {
