@@ -4,7 +4,7 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
-plan 2;
+plan 3;
 
 for (False, True) -> $create-table-if-not-exists {
     subtest "with create-table-if-not-exists flag $create-table-if-not-exists" => {
@@ -172,4 +172,23 @@ for (False, True) -> $create-table-if-not-exists {
                 'string with embedded quote';
         }
     }
+}
+
+subtest 'omit tables' => {
+    plan 4;
+
+    my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new(:omit-tables('foo','baz')));
+    ok $xlate, 'created translator';
+
+    is $xlate.parse('CREATE TABLE schema.foo (col1 VARCHAR2);'),
+        "\n",
+        'Table foo was skipped';
+
+    is $xlate.parse('CREATE TABLE schema.bar (col1 VARCHAR2);'),
+        "CREATE TABLE schema.bar ( col1 VARCHAR );\n",
+        'Table bar was translated';
+
+    is $xlate.parse('CREATE TABLE schema.baz (col1 VARCHAR2);'),
+        "\n",
+        'Table baz was skipped';
 }

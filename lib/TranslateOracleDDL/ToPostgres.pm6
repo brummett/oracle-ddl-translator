@@ -3,17 +3,20 @@ use v6;
 use TranslateOracleDDL::StateFile;
 
 my role DuplicateConstraint { }
+my role OmittedTable { }
 
 class TranslateOracleDDL::ToPostgres {
     has Str $.schema;
     has Bool $.create-table-if-not-exists = False;
     has Bool $.create-index-if-not-exists = False;
     has Bool $.omit-quotes-in-identifiers = False;
+    has Str @.omit-tables;
 
     has TranslateOracleDDL::StateFile $!state-file handles ( save-state => 'write' );
     has Str %!entity-aliases;
 
     method BUILD(Bool :$!create-table-if-not-exists, Bool :$!create-index-if-not-exists, Bool :$!omit-quotes-in-identifiers, Str :$!schema,
+                :@!omit-tables,
                 Str :$state-file-name = '/dev/null'
     ) {
         $!state-file = TranslateOracleDDL::StateFile.new(filename => $state-file-name);
@@ -21,6 +24,7 @@ class TranslateOracleDDL::ToPostgres {
 
     sub should-omit-statement(Match $m --> Bool) {
         return True if $m.made ~~ DuplicateConstraint;
+        return True if $m.made ~~ OmittedTable;
         my @sub-matches;
         for $m.list -> $positional {
             @sub-matches.push( $positional ~~ Positional ?? |$positional !! $positional );
@@ -156,7 +160,9 @@ class TranslateOracleDDL::ToPostgres {
         my @columns = $<create-table-column-def>>>.made;
         my @constraints = $<table-constraint-def>>>.made;
         my $if-not-exists = $!create-table-if-not-exists ?? ' IF NOT EXISTS' !! '';
-        make "CREATE TABLE{ $if-not-exists } { $<entity-name>.made } ( " ~ (|@columns, |@constraints).join(', ') ~ " )"
+        my $sql = "CREATE TABLE{ $if-not-exists } { $<entity-name>.made } ( " ~ (|@columns, |@constraints).join(', ') ~ " )";
+        $sql does OmittedTable if $<entity-name>.<identifier>[*-1] eq any(@!omit-tables);
+        make $sql;
     }
 
     method create-table-column-def ($/) {
