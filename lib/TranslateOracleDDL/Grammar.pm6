@@ -142,6 +142,7 @@ grammar TranslateOracleDDL::Grammar {
     rule create-table-extra-oracle-stuff {
         [ 'ORGANIZATION' [ 'HEAP' | 'INDEX' ]? ]
         | 'MONITORING'
+        | 'PCTTHRESHOLD' (\d+)
         | 'OVERFLOW'
     }
 

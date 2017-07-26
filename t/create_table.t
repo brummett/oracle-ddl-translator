@@ -150,10 +150,11 @@ for (False, True) -> $create-table-if-not-exists {
                 ORGANIZATION    HEAP
                 ORGANIZATION
                 MONITORING
+                PCTTHRESHOLD 50
                 OVERFLOW;
                 ORACLE
                 "$create-table foo.addon2 ( col_a VARCHAR );\n",
-                '3 add-ons';
+                'more add-ons';
         }
 
         subtest 'COMMENT ON' => {
