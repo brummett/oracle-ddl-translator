@@ -25,6 +25,8 @@ multi MAIN(ExistingDirectoryPath :$source, ExistingDirectoryPath :$dest) {
 
         $dest-file.spurt( $xlate.parsefile($source-file.Str) );
     }
+
+    $xlate.translator.save-state;
     exit 0;
 }
 
