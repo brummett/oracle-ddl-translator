@@ -22,9 +22,9 @@ class TranslateOracleDDL::ToPostgres {
         $!state-file = TranslateOracleDDL::StateFile.new(filename => $state-file-name);
     }
 
-    sub should-omit-statement(Match $m --> Bool) {
-        return True if $m.made ~~ DuplicateConstraint;
-        return True if $m.made ~~ OmittedTable;
+    sub recurse-grep(Callable $matcher, Match $m --> Mu) {
+        return $m if $matcher.($m);
+
         my @sub-matches;
         for $m.list -> $positional {
             @sub-matches.push( $positional ~~ Positional ?? |$positional !! $positional );
@@ -34,9 +34,14 @@ class TranslateOracleDDL::ToPostgres {
         }
 
         for @sub-matches -> $sub-match {
-            return True if should-omit-statement($sub-match);
+            my $rv = recurse-grep($matcher, $sub-match);
+            return $rv if $rv;
         }
-        return False;
+        return Failure;
+    }
+
+    sub should-omit-statement(Match $m --> Match) {
+        recurse-grep( { $^a.made ~~ any(DuplicateConstraint, OmittedTable) }, $m);
     }
 
     method TOP($/) {
