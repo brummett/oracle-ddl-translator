@@ -4,7 +4,7 @@ use Test;
 use TranslateOracleDDL;
 use TranslateOracleDDL::ToPostgres;
 
-plan 5;
+plan 6;
 
 subtest 'primary key' => {
     plan 4;
@@ -113,4 +113,25 @@ subtest 'DISABLEd' => {
         ORACLE
         "\n",
         'broken CHECK constraint disappears';
+}
+
+subtest 'not valid constraints' => {
+    plan 2;
+
+    my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new(:not-valid-constraints));
+    ok $xlate, 'Created translator for creating NOT VALID constraints';
+
+
+    is $xlate.parse("ALTER TABLE foo.ck ADD CONSTRAINT ck_valid CHECK(col_name = 1);
+                     CREATE TABLE bar(id VARCHAR2);
+                     ALTER TABLE foo.ck2 ADD CONSTRAINT fk_valid FOREIGN KEY ( col1 ) REFERENCES other.table (other1);
+        "),
+    q :to<POSTGRES>,
+        ALTER TABLE foo.ck ADD CONSTRAINT ck_valid CHECK ( col_name = 1 ) NOT VALID;
+        CREATE TABLE bar ( id VARCHAR );
+        ALTER TABLE foo.ck2 ADD CONSTRAINT fk_valid FOREIGN KEY ( col1 ) REFERENCES other.table ( other1 ) NOT VALID;
+        ALTER TABLE foo.ck VALIDATE CONSTRAINT ck_valid;
+        ALTER TABLE foo.ck2 VALIDATE CONSTRAINT fk_valid;
+        POSTGRES
+    'created constraints in NOT VALID state with VALIDATE at the end';
 }

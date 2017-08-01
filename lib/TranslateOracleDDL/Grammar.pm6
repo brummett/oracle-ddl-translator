@@ -13,7 +13,10 @@ grammar TranslateOracleDDL::Grammar {
         { $last-statement-type = $last-element-name = ''; $last-pos = 0; }
 
         <input-line>+
+        <end-of-input>
     }
+
+    token end-of-input { $ }
 
     token string-to-end-of-line {
         \V+

@@ -4,19 +4,22 @@ use TranslateOracleDDL::StateFile;
 
 my role DuplicateConstraint { }
 my role OmittedTable { }
+my role ConstraintNeedsPostValidation { has $.constraint-name is rw }
 
 class TranslateOracleDDL::ToPostgres {
     has Str $.schema;
     has Bool $.create-table-if-not-exists = False;
     has Bool $.create-index-if-not-exists = False;
     has Bool $.omit-quotes-in-identifiers = False;
+    has Bool $.not-valid-constraints = False;
     has Str @.omit-tables;
 
     has TranslateOracleDDL::StateFile $!state-file handles ( save-state => 'write' );
     has Str %!entity-aliases;
+    has Str @.post-translation-sql;
 
     method BUILD(Bool :$!create-table-if-not-exists, Bool :$!create-index-if-not-exists, Bool :$!omit-quotes-in-identifiers, Str :$!schema,
-                :@!omit-tables,
+                :@!omit-tables, Bool :$!not-valid-constraints,
                 Str :$state-file-name = '/dev/null'
     ) {
         $!state-file = TranslateOracleDDL::StateFile.new(filename => $state-file-name);
@@ -45,7 +48,13 @@ class TranslateOracleDDL::ToPostgres {
     }
 
     method TOP($/) {
-        make $<input-line>>>.made.grep({ $_ }).join("\n") ~ "\n";
+        my $sql-statements = $<input-line>>>.made.grep({ $_ }).join("\n");
+        my $post-translation-sql = $<end-of-input>.made;
+        make join("\n", $sql-statements, $post-translation-sql);
+    }
+
+    method end-of-input($/) {
+        make join("\n", @!post-translation-sql,'');
     }
 
     method input-line:sym<sqlplus-directive>    ($/) { make $<sqlplus-directive>.made }
@@ -219,6 +228,10 @@ class TranslateOracleDDL::ToPostgres {
             @parts.push: @<constraint-options>>>.made.grep({ $_ });
         }
 
+        if (my $post = recurse-grep( { $^a ~~ ConstraintNeedsPostValidation}, $/)) {
+            $post.constraint-name = $<identifier>.made;
+        }
+
         my Str $constraint = @parts.join(' ');
         $constraint does DuplicateConstraint unless $!state-file.set(type => CONSTRAINT_NAME, name => $<identifier>.made);
         make $constraint;
@@ -226,9 +239,21 @@ class TranslateOracleDDL::ToPostgres {
 
     method table-constraint:sym<PRIMARY-KEY> ($/) { make "PRIMARY KEY ( { @<identifier>>>.made.join(', ') } )" }
     method table-constraint:sym<UNIQUE> ($/)      { make "UNIQUE ( { @<identifier>>>.made.join(', ') } )" }
-    method table-constraint:sym<CHECK> ($/)       { make "CHECK ( { $<expr>.made } )" }
+    method table-constraint:sym<CHECK> ($/) {
+        my Str $constr = "CHECK ( { $<expr>.made } )";
+        if $!not-valid-constraints {
+            $constr ~= ' NOT VALID';
+            $/ does ConstraintNeedsPostValidation;
+        }
+        make $constr;
+    }
     method table-constraint:sym<FOREIGN-KEY> ($/) {
-        make "FOREIGN KEY ( { @<table-columns>.join(', ') } ) REFERENCES { $<entity-name>.made } ( { @<fk-columns>.join(', ') } )";
+        my Str $constr = "FOREIGN KEY ( { @<table-columns>.join(', ') } ) REFERENCES { $<entity-name>.made } ( { @<fk-columns>.join(', ') } )";
+        if $!not-valid-constraints {
+            $constr ~= ' NOT VALID';
+            $/ does ConstraintNeedsPostValidation;
+        }
+        make $constr;
     }
 
     method constraint-options:sym<DEFERRABLE> ($/) { make $/ }
@@ -242,7 +267,13 @@ class TranslateOracleDDL::ToPostgres {
         ) {
             make Str;  # Postgres doesn't support disabled constraints, remove them
         } else {
-            make 'ALTER TABLE ' ~ $<entity-name>.made ~ ' ' ~ $<alter-table-action>.made;
+            my $table-name = $<entity-name>.made;
+            if (my $post = recurse-grep( { $^a ~~ ConstraintNeedsPostValidation}, $/)) {
+                my $constraint-name = $post.constraint-name;
+                @!post-translation-sql.push("ALTER TABLE $table-name VALIDATE CONSTRAINT $constraint-name;");
+            }
+
+            make "ALTER TABLE $table-name " ~ $<alter-table-action>.made;
         }
     }
     method sql-statement:sym<ALTER-TABLE-BROKEN-CONSTRAINT> ($/) { make Str }
