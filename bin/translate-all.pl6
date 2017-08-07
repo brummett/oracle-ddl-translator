@@ -15,6 +15,7 @@ multi MAIN(ExistingDirectoryPath :$source, ExistingDirectoryPath :$dest) {
     my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new(:create-table-if-not-exists,
                                                                                         :create-index-if-not-exists,
                                                                                         :omit-quotes-in-identifiers,
+                                                                                        :not-valid-constraints,
                                                                                         :omit-tables(['freezer_content']), # This is a materialized view
                                                                                         :state-file-name(translation-state-file)));
     for @files-to-translate -> $file {
