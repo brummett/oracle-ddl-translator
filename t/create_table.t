@@ -25,7 +25,7 @@ for (False, True) -> $create-table-if-not-exists {
                         , col2 NUMBER
                     );
                 ORACLE
-                "$create-table foo.table1 ( col1 VARCHAR(10), col2 DOUBLE PRECISION );\n",
+                "$create-table foo.table1 ( col1 VARCHAR(10), col2 NUMERIC );\n",
                 'table1';
 
             is $xlate.parse( q :to<ORACLE> ),
@@ -56,7 +56,7 @@ for (False, True) -> $create-table-if-not-exists {
                     , numAB NUMBER  (10,2)
                     );
                 ORACLE
-                "$create-table foo.table3 ( id DOUBLE PRECISION NOT NULL, num1 SMALLINT, num3 SMALLINT, num5 INT, num9 BIGINT, num19 DECIMAL(19), numAB DECIMAL(10,2) );\n",
+                "$create-table foo.table3 ( id NUMERIC NOT NULL, num1 SMALLINT, num3 SMALLINT, num5 INT, num9 BIGINT, num19 DECIMAL(19), numAB DECIMAL(10,2) );\n",
                 'NUMBER type conversions';
 
             is $xlate.parse( 'CREATE TABLE foo.ints ( col_a INTEGER );'),
