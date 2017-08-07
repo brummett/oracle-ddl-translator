@@ -123,11 +123,13 @@ subtest 'not valid constraints' => {
 
 
     is $xlate.parse("ALTER TABLE foo.ck ADD CONSTRAINT ck_valid CHECK(col_name = 1);
+                     ALTER TABLE foo.ck ADD CONSTRAINT foo_pk_c PRIMARY KEY ( pk_column );
                      CREATE TABLE bar(id VARCHAR2);
                      ALTER TABLE foo.ck2 ADD CONSTRAINT fk_valid FOREIGN KEY ( col1 ) REFERENCES other.table (other1);
         "),
     q :to<POSTGRES>,
         ALTER TABLE foo.ck ADD CONSTRAINT ck_valid CHECK ( col_name = 1 ) NOT VALID;
+        ALTER TABLE foo.ck ADD CONSTRAINT foo_pk_c PRIMARY KEY ( pk_column );
         CREATE TABLE bar ( id VARCHAR );
         ALTER TABLE foo.ck2 ADD CONSTRAINT fk_valid FOREIGN KEY ( col1 ) REFERENCES other.table ( other1 ) NOT VALID;
         ALTER TABLE foo.ck VALIDATE CONSTRAINT ck_valid;
