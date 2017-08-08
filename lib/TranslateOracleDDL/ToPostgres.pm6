@@ -48,6 +48,8 @@ class TranslateOracleDDL::ToPostgres {
     }
 
     method TOP($/) {
+        @!post-translation-sql = ();  # throw out any leftovers when starting a new parse
+
         my $sql-statements = $<input-line>>>.made.grep({ $_ }).join("\n");
         my $post-translation-sql = $<end-of-input>.made;
         make join("\n", $sql-statements, $post-translation-sql);

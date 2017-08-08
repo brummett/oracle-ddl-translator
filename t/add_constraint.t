@@ -116,7 +116,7 @@ subtest 'DISABLEd' => {
 }
 
 subtest 'not valid constraints' => {
-    plan 2;
+    plan 3;
 
     my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new(:not-valid-constraints));
     ok $xlate, 'Created translator for creating NOT VALID constraints';
@@ -136,4 +136,8 @@ subtest 'not valid constraints' => {
         ALTER TABLE foo.ck2 VALIDATE CONSTRAINT fk_valid;
         POSTGRES
     'created constraints in NOT VALID state with VALIDATE at the end';
+
+    is $xlate.parse('CREATE TABLE baz(id VARCHAR2);'),
+        "CREATE TABLE baz ( id VARCHAR );\n",
+        q{constraint VALIDATEs aren't left over from the last translation};
 }
