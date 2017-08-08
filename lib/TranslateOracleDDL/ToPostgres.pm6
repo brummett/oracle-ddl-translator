@@ -56,7 +56,8 @@ class TranslateOracleDDL::ToPostgres {
     }
 
     method end-of-input($/) {
-        make join("\n", @!post-translation-sql,'');
+        my @statements = grep { ! ( $_ ~~ any(DuplicateConstraint, OmittedTable) ) }, @!post-translation-sql;
+        make join("\n", @statements,'');
     }
 
     method input-line:sym<sqlplus-directive>    ($/) { make $<sqlplus-directive>.made }
@@ -269,14 +270,18 @@ class TranslateOracleDDL::ToPostgres {
         ) {
             make Str;  # Postgres doesn't support disabled constraints, remove them
         } else {
+            my $should-omit = $<entity-name>.<identifier>[*-1] eq any(@!omit-tables);
+
             my $table-name = $<entity-name>.made;
             if (my $post = recurse-grep( { $^a ~~ ConstraintNeedsPostValidation}, $/)) {
                 my $constraint-name = $post.constraint-name;
-                @!post-translation-sql.push("ALTER TABLE $table-name VALIDATE CONSTRAINT $constraint-name;");
+                my Str $post-translation-sql = "ALTER TABLE $table-name VALIDATE CONSTRAINT $constraint-name;";
+                $post-translation-sql does OmittedTable if $should-omit;
+                @!post-translation-sql.push($post-translation-sql);
             }
 
             my $sql = "ALTER TABLE $table-name " ~ $<alter-table-action>.made;
-            $sql does OmittedTable if $<entity-name>.<identifier>[*-1] eq any(@!omit-tables);
+            $sql does OmittedTable if $should-omit;
             make $sql;
         }
     }

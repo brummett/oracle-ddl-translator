@@ -178,7 +178,7 @@ for (False, True) -> $create-table-if-not-exists {
 subtest 'omit tables' => {
     plan 4;
 
-    my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new(:omit-tables('foo','baz')));
+    my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new(:omit-tables('foo','baz'), :not-valid-constraints));
     ok $xlate, 'created translator';
 
     is $xlate.parse( q :to<ORACLE> ),
