@@ -275,7 +275,9 @@ class TranslateOracleDDL::ToPostgres {
                 @!post-translation-sql.push("ALTER TABLE $table-name VALIDATE CONSTRAINT $constraint-name;");
             }
 
-            make "ALTER TABLE $table-name " ~ $<alter-table-action>.made;
+            my $sql = "ALTER TABLE $table-name " ~ $<alter-table-action>.made;
+            $sql does OmittedTable if $<entity-name>.<identifier>[*-1] eq any(@!omit-tables);
+            make $sql;
         }
     }
     method sql-statement:sym<ALTER-TABLE-BROKEN-CONSTRAINT> ($/) { make Str }
@@ -298,6 +300,7 @@ class TranslateOracleDDL::ToPostgres {
 
         my Str $index = @parts.join(' ');
         $index does DuplicateConstraint if $<unique> and ! $!state-file.set(type => CONSTRAINT_NAME, name => $index-name);
+        $index does OmittedTable if $<table-name>.<identifier>[*-1] eq any(@!omit-tables);
         make $index;
     }
 

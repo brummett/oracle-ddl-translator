@@ -181,9 +181,13 @@ subtest 'omit tables' => {
     my $xlate = TranslateOracleDDL.new(translator => TranslateOracleDDL::ToPostgres.new(:omit-tables('foo','baz')));
     ok $xlate, 'created translator';
 
-    is $xlate.parse('CREATE TABLE schema.foo (col1 VARCHAR2);'),
+    is $xlate.parse( q :to<ORACLE> ),
+        CREATE TABLE schema.foo (col1 VARCHAR2);
+        ALTER TABLE schema.foo ADD CONSTRAINT schema_foo_ck CHECK ( col1 IS NOT NULL );
+        CREATE INDEX foo_idx ON schema.foo (col1);
+        ORACLE
         "\n",
-        'Table foo was skipped';
+        'Table/constraint/index foo was skipped';
 
     is $xlate.parse('CREATE TABLE schema.bar (col1 VARCHAR2);'),
         "CREATE TABLE schema.bar ( col1 VARCHAR );\n",
